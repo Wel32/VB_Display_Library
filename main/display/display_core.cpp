@@ -413,10 +413,12 @@ void redraw_all(draw_obj_list draw_buffer)
 void redraw_group(draw_obj_list draw_buffer, uint8_t first_ayer, uint8_t end_layer)
 {
 	if (first_ayer >= draw_buffer.elem_cnt || end_layer >= draw_buffer.elem_cnt) return;
+	
+	uint8_t draw_buf_end_layer = draw_buffer.elem_cnt;
 
 	for (uint8_t i = first_ayer; i < end_layer; i++)
 	{
-		draw_buffer.elem_cnt = i + 1;
+		if (end_layer == draw_buf_end_layer) draw_buffer.elem_cnt = i + 1;
 		common_draw(draw_buffer, draw_buffer.obj[i].pos);
 	}
 }
@@ -718,8 +720,8 @@ rect max_rect(rect r1, rect r2)
 
 rect min_rect(rect r1, rect r2)
 {
-	if (!check_rect_direction(&r1)) return r2;
-	if (!check_rect_direction(&r2)) return r1;
+	if (!check_rect_direction(&r1)) return make_void_rect();
+	if (!check_rect_direction(&r2)) return make_void_rect();
 
 	return internal_min_rect(r1, r2);
 }
