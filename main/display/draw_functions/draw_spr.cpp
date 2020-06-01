@@ -56,7 +56,7 @@ void spr_str_init(internal_draw_obj* img)
 		}
 	}
   
-	union {int32_t full; uint16_t dc[2]; } mixdata;
+	union {uint32_t full; uint16_t dc[2]; } mixdata;
 	
 	uint32_t trans = img->user_color >> 24;
 	data_color = conv_data_color(data_color, img->options);
@@ -72,10 +72,10 @@ void spr_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 	
 	uint8_t* sprite_data = (uint8_t*)(img->handle);
 
-	union {int32_t full; uint8_t color[4]; } spr_color;
+	union {uint32_t full; uint8_t color[4]; } spr_color;
 	spr_color.full = img->user_color;
   
-	union {int32_t full; uint16_t dc[2]; } mixdata;
+	union {uint32_t full; uint16_t dc[2]; } mixdata;
 	mixdata.full = img->user_data;
   
 	uint8_t data_color;
@@ -141,7 +141,7 @@ void spr_str_memclear(internal_draw_obj* img)
 
 
 
-draw_obj make_sprite(const tSprite* spr, int16_t x, int16_t y, int32_t color, uint8_t options, uint8_t align)
+draw_obj make_sprite(const tSprite* spr, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
 {
 	if (spr == NULL) return make_void_obj();
 	

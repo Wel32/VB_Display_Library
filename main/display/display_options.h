@@ -20,7 +20,8 @@
 #else	#define DISPLAY_WIDTH 320	#define DISPLAY_HEIGHT 480#endif
 
 
-
+#define MAX_LAYERS_TO_BLENDING 20
+#define LCD_INV_BRIGHTNESS 0
 
 
 

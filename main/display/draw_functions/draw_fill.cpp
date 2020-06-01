@@ -14,7 +14,7 @@ void fill_str_init(internal_draw_obj* img)
 #if LCD_SPI_ENABLE_DMA
 	img->user_data = (img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 2 : 3;
 #else 
-	img->user_data = layers;
+	img->user_data = (img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 1 : 2;
 #endif
 	
 #if LCD_INV_BRIGHTNESS
@@ -85,8 +85,8 @@ void fill_str_memclear(internal_draw_obj* img)
 
 
 
-//draw_obj_list make_fill(int16_t x, int16_t y, uint16_t width, uint16_t height, int32_t color, uint8_t align)
-draw_obj make_fill(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int32_t color, uint8_t options)
+//draw_obj_list make_fill(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color, uint8_t align)
+draw_obj make_fill(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color, uint8_t options)
 {
 	draw_obj res;
 	

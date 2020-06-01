@@ -337,7 +337,7 @@ void bmp_str_memclear(internal_draw_obj* img)
 
 
 
-draw_obj make_bmp_from_tImage(const tImage* img, int16_t x, int16_t y, int32_t color, uint8_t options, uint8_t align)
+draw_obj make_bmp_from_tImage(const tImage* img, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
 {
 	draw_obj res;
 	
@@ -360,7 +360,7 @@ draw_obj make_bmp_from_tImage(const tImage* img, int16_t x, int16_t y, int32_t c
 
 
 
-draw_obj make_embed_bmp(const char* bmpfile_start_pointer, int16_t x, int16_t y, int32_t color, uint8_t options, uint8_t align)
+draw_obj make_embed_bmp(const char* bmpfile_start_pointer, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
 {
 	draw_obj res;
 	
@@ -385,7 +385,7 @@ draw_obj make_embed_bmp(const char* bmpfile_start_pointer, int16_t x, int16_t y,
 
 
 
-draw_obj make_file_bmp_from_file(const char* filename, int16_t x, int16_t y, int32_t color, uint8_t options, uint8_t align)
+draw_obj make_file_bmp_from_file(const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
 {
 	draw_obj res;
 	

@@ -23,9 +23,6 @@ void alloc_additional_str_buffer();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define LCD_INV_BRIGHTNESS 0
-#define MAX_LAYERS_TO_DRAW 20
-
 
 #define LAYER_OPTIONS_FIRST_LAYER (1<<0)
 #define LAYER_OPTIONS_SINGLE_LAYER (1<<1)

@@ -42,4 +42,4 @@
 #define BOTTOM_ALIGN (1<<4)
 #define TOP_ALIGN (2<<4)
 
-#define DELETE_IMG (255<<24)
+#define DELETE_IMG_COLOR (255<<24)

@@ -75,7 +75,7 @@ uint8_t lcdSetOrient(uint8_t orient)
 
 uint32_t invert_color(uint32_t color)
 {
-	union {int32_t full; uint8_t dc[4]; } temp_color;
+	union {uint32_t full; uint8_t dc[4]; } temp_color;
 	temp_color.full = color;
 	uint8_t temp = temp_color.dc[0];
 	temp_color.dc[0] = temp_color.dc[2];
@@ -272,7 +272,7 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 	draw_obj* img_list = draw_buffer.obj;
 	uint8_t layers = draw_buffer.elem_cnt;
 
-	internal_draw_obj draw_list[MAX_LAYERS_TO_DRAW], *pdrl;
+	internal_draw_obj draw_list[MAX_LAYERS_TO_BLENDING], *pdrl;
 
 	int16_t mask_width = mask.x1 - mask.x0 + 1;
 	clamp_min(mask_width, 0);
@@ -309,7 +309,7 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 
 		pdrl++;
 		draw_layers++;
-		if (draw_layers == MAX_LAYERS_TO_DRAW) break;
+		if (draw_layers == MAX_LAYERS_TO_BLENDING) break;
 	}
 
 	if (!draw_layers) return;
@@ -446,7 +446,7 @@ draw_obj make_void_obj()
 	res.pos = make_void_rect();
 	res.obj_type = TVOID;
 	res.handle = NULL;
-	res.color = DELETE_IMG;
+	res.color = DELETE_IMG_COLOR;
 
 	return res;
 }
@@ -476,7 +476,7 @@ void delete_img(draw_obj_list draw_buffer, uint8_t img_layer)
 {
 	if (img_layer >= draw_buffer.elem_cnt) return;
 	
-	draw_buffer.obj[img_layer].color = DELETE_IMG;
+	draw_buffer.obj[img_layer].color = DELETE_IMG_COLOR;
 	common_draw(draw_buffer, draw_buffer.obj[img_layer].pos);
 
 	draw_buffer.obj[img_layer] = make_void_obj();
@@ -486,7 +486,7 @@ void hide_img(draw_obj_list draw_buffer, uint8_t img_layer)
 {
 	if (img_layer >= draw_buffer.elem_cnt) return;
 	
-	draw_buffer.obj[img_layer].color = DELETE_IMG;
+	draw_buffer.obj[img_layer].color |= DELETE_IMG_COLOR;
 	common_draw(draw_buffer, draw_buffer.obj[img_layer].pos);
 }
 
@@ -515,7 +515,7 @@ void _update_img(draw_obj_list draw_buffer, uint8_t img_layer, draw_obj* new_img
 		//Delete the image in whole or in part if the old and new images overlap//////////////////////
 		rect part_mask, del_mask;
 
-		cur_img2->color = DELETE_IMG;
+		cur_img2->color = DELETE_IMG_COLOR;
 		
 		
 #ifdef ENABLE_FRAGMEMT_DRAWING

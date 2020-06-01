@@ -23,7 +23,7 @@ typedef struct
 	uint16_t obj_type;
 	uint16_t options;
 	void* handle;
-	int32_t color;
+	uint32_t color;
 }
 draw_obj;
 
@@ -56,8 +56,8 @@ typedef struct
 	uint32_t img_cur_pos;
 	int16_t img_cur_y;
 	uint16_t options;
-	int32_t user_color;
-	int32_t user_data;
+	uint32_t user_color;
+	uint32_t user_data;
 }
 internal_draw_obj;
 

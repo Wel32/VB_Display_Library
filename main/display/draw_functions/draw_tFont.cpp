@@ -61,7 +61,7 @@ void tFont_str_init(internal_draw_obj* img)
 		else img->img_cur_pos--;
 	}
   
-	union {int32_t full; uint16_t dc[2]; } mixdata;
+	union {uint32_t full; uint16_t dc[2]; } mixdata;
 	
 	uint32_t trans = img->user_color >> 24;
 	
@@ -77,10 +77,10 @@ void tFont_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 {
 	uint8_t* sprite_data = (uint8_t*)(img->handle);
 
-	union {int32_t full; uint8_t color[4]; } spr_color;
+	union {uint32_t full; uint8_t color[4]; } spr_color;
 	spr_color.full = img->user_color;
   
-	union {int32_t full; uint16_t dc[2]; } mixdata;
+	union {uint32_t full; uint16_t dc[2]; } mixdata;
 	mixdata.full = img->user_data;
   
 	uint8_t data_color;
@@ -148,7 +148,7 @@ void tFont_str_memclear(internal_draw_obj* img)
 }
 
 
-draw_obj make_tFont_symbol(wchar_t c, tFont font, int16_t x, int16_t y, int32_t color, uint8_t options, uint8_t align)
+draw_obj make_tFont_symbol(wchar_t c, tFont font, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
 {
 	static wchar_t past_c = 0x20;
 	static uint16_t past_i = 0;
@@ -211,7 +211,7 @@ rect get_tFont_string_common_rect(tFont font, int16_t char_space, const wchar_t*
 	return res;
 }
 
-void draw_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t char_space, const wchar_t* str, int16_t text_x0, int16_t text_y0, int32_t color, uint8_t options, uint8_t align)
+void draw_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t char_space, const wchar_t* str, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
 {
 	if (layer >= draw_buffer.elem_cnt) return;
 	
@@ -288,7 +288,7 @@ void draw_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont font, int
 	draw_buffer.obj[layer].obj_type = TVOID;
 }
 
-void draw_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t char_space, int16_t string_space, const wchar_t** str, uint8_t str_cnt, int16_t text_x0, int16_t text_y0, int32_t color, uint8_t options, uint8_t align)
+void draw_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t char_space, int16_t string_space, const wchar_t** str, uint8_t str_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
 {
 	if (layer >= draw_buffer.elem_cnt) return;
 	
@@ -330,7 +330,7 @@ void draw_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, in
 
 
 
-uint8_t draw_tFont_string_separate_sprites(draw_obj_list draw_buffer, uint8_t layer, uint8_t max_symbol_cnt, tFont font, int16_t char_space, const wchar_t* str, int16_t text_x0, int16_t text_y0, int32_t color, uint8_t options, uint8_t align)
+uint8_t draw_tFont_string_separate_sprites(draw_obj_list draw_buffer, uint8_t layer, uint8_t max_symbol_cnt, tFont font, int16_t char_space, const wchar_t* str, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
 {
 	if ((layer + max_symbol_cnt) >= draw_buffer.elem_cnt) return 0;
 	
@@ -437,7 +437,7 @@ int16_t fit_tFont_string_char_space(tFont font, int16_t *char_space, const wchar
 
 
 
-bool draw_fitted_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t min_char_space, int16_t max_char_space, int16_t max_width, const wchar_t* str, int16_t text_x0, int16_t text_y0, int32_t color, uint32_t options, uint8_t align)
+bool draw_fitted_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t min_char_space, int16_t max_char_space, int16_t max_width, const wchar_t* str, int16_t text_x0, int16_t text_y0, uint32_t color, uint32_t options, uint8_t align)
 {
 	int16_t text_length = fit_tFont_string_char_space(font, &max_char_space, str, max_width);
 	if (max_char_space < min_char_space) return 0;
@@ -449,7 +449,7 @@ bool draw_fitted_tFont_string(draw_obj_list draw_buffer, uint8_t layer, tFont fo
 }
 
 
-uint8_t draw_fitted_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t min_char_space, int16_t max_char_space, int16_t max_width, int16_t string_space, const wchar_t** str, uint8_t str_cnt, int16_t text_x0, int16_t text_y0, int32_t color, uint32_t options, uint8_t align)
+uint8_t draw_fitted_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, int16_t min_char_space, int16_t max_char_space, int16_t max_width, int16_t string_space, const wchar_t** str, uint8_t str_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint32_t options, uint8_t align)
 {
 	if (layer >= draw_buffer.elem_cnt) return 0;
 	
