@@ -2,16 +2,33 @@
 #include "draw_tFont.h"
 
 
+#ifdef CORR_GAMMA1
+#define INTR_CORR_GAMMA1 CORR_GAMMA1
+#else
+#define INTR_CORR_GAMMA1 0
+#endif
+
+#ifdef CORR_GAMMA2
+#define INTR_CORR_GAMMA2 CORR_GAMMA2
+#else
+#define INTR_CORR_GAMMA2 0
+#endif
 
 inline uint8_t conv_data_color(uint8_t data_color, uint8_t options)
 {
-	if (options&(CORR_GAMMA1 | CORR_GAMMA2))
+	if (options&(INTR_CORR_GAMMA1 | INTR_CORR_GAMMA2))
 	{
 		uint8_t inv_option = options&(INVERT_CORR_GAMMA | DRAW_INV_TRANSPARENCY);
 		if (inv_option == INVERT_CORR_GAMMA || inv_option == DRAW_INV_TRANSPARENCY) data_color = 255 - data_color;
 		
-		if (options&CORR_GAMMA1) data_color = inverted_tFont_gamma1[data_color];
-		else data_color = inverted_tFont_gamma2[data_color];
+		if (options&INTR_CORR_GAMMA1) data_color = inverted_tFont_gamma1[data_color];
+#ifdef CORR_GAMMA2
+		else
+#if INTR_CORR_GAMMA1 == 0
+			if (options&INTR_CORR_GAMMA2)
+#endif
+			data_color = inverted_tFont_gamma2[data_color];
+#endif
 		
 		if (options&INVERT_CORR_GAMMA) data_color = 255 - data_color;
 	}
@@ -332,7 +349,7 @@ void draw_tFont_strings(draw_obj_list draw_buffer, uint8_t layer, tFont font, in
 
 uint8_t draw_tFont_string_separate_sprites(draw_obj_list draw_buffer, uint8_t layer, uint8_t max_symbol_cnt, tFont font, int16_t char_space, const wchar_t* str, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
 {
-	if ((layer + max_symbol_cnt) >= draw_buffer.elem_cnt) return 0;
+	if ((layer + max_symbol_cnt) > draw_buffer.elem_cnt) return 0;
 	
 	draw_obj sym;
 	uint8_t internal_align = (align & 0xF0) | LEFT_ALIGN;

@@ -11,38 +11,40 @@ void fill_str_init(internal_draw_obj* img)
 	img->user_color = (img->user_color & 0xFF000000) | ((0xFFFFFFFF - img->user_color) & 0xFFFFFF);
 #endif
 	
-#if LCD_SPI_ENABLE_DMA
-	img->user_data = (img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 2 : 3;
-#else 
-	img->user_data = (img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 1 : 2;
-#endif
-	
 #if LCD_INV_BRIGHTNESS
 	img->user_color = (img->user_color & 0xFF000000) | ((0xFFFFFFFF - img->user_color) & 0xFFFFFF);
 #endif
 	
 	uint8_t temp_trans = img->user_color >> 24;
 	img->user_data = temp_trans * 256 / 255;
+	
+#if LCD_SPI_ENABLE_DMA
+	img->user_data |= ((img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 2 : 3)<<24;
+#else 
+	img->user_data |= ((img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 1 : 2)<<24;
+#endif
 }
 
 
 void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 {
-	if (img->user_data == 0) return;
+	if (img->user_data < (1 << 24)) return;
+	
+	uint8_t layer_count_options = img->user_data >> 24;
 	
 	uint16_t user_transparency, inv_user_transparency;
 	
 	if (!(img->layer_options&LAYER_OPTIONS_FIRST_LAYER))
 	{
-		user_transparency = img->user_data;
+		user_transparency = (img->user_data) & 0xFFFF;
 		inv_user_transparency = 256 - user_transparency;
 	}
 	else user_transparency = 0;
 
 #if LCD_SPI_ENABLE_DMA
-	if (img->user_data && img->user_data <= 2) img->user_data--;
+	if (layer_count_options && layer_count_options <= 2) img->user_data -= (1 << 24);
 #else
-	if (img->user_data == 1) img->user_data = 0;
+	if (layer_count_options == 1) img->user_data -= (1 << 24);
 #endif
 	
 	uint8_t clr1, clr2, clr3;
@@ -85,7 +87,6 @@ void fill_str_memclear(internal_draw_obj* img)
 
 
 
-//draw_obj_list make_fill(int16_t x, int16_t y, uint16_t width, uint16_t height, uint32_t color, uint8_t align)
 draw_obj make_fill(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color, uint8_t options)
 {
 	draw_obj res;

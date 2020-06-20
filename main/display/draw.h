@@ -41,14 +41,12 @@ drobj_type;
 #define DRAW_INV_TRANSPARENCY (1<<1)
 
 
-#define CORR_GAMMA1 (1<<5)
+//#define CORR_GAMMA1 (1<<5)
 #define CORR_GAMMA2 (1<<6)
 #define INVERT_CORR_GAMMA (1<<7)
 
 
 
-void draw_string(draw_obj_list draw_buffer, uint8_t layer, draw_obj_list img_str);
-void draw_strings(draw_obj_list draw_buffer, uint8_t layer, draw_obj_list* img_str, uint8_t str_cnt);
 
 
 

@@ -22,3 +22,4 @@ void UserLcdOn();
 void UserLcdSetBrightness(uint8_t value);
 void UserLcdTrimBrightness(uint8_t value);
 void UserLcdSetBrightnessQuietly(uint8_t value);
+void UserLcdTrimBrightnessQuietly(uint8_t value);

@@ -3,6 +3,10 @@
 #include "../user_drivers/system_include.h"
 #include "lcd_init.h"
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 	
 	
 	
@@ -28,11 +32,6 @@
 extern spi_device_handle_t spi;
 
 
-
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef struct {
     uint8_t cmd;

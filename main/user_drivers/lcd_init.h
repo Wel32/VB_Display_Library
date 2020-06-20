@@ -16,11 +16,11 @@ extern uint8_t display_is_initialized;
 //arguments of 0x36 lcd cmd for set the orientation
 #define LCD_CMD_SET_ORIENT 0x36
 
-#define LCD_DATA_PR_ORIENT 0xC0
-#define LCD_DATA_AL_ORIENT 0x60
+#define LCD_DATA_PR2_ORIENT 0xC0
+#define LCD_DATA_AL2_ORIENT 0x60
 
-#define LCD_DATA_PR2_ORIENT 0x00
-#define LCD_DATA_AL2_ORIENT 0xA0
+#define LCD_DATA_PR_ORIENT 0x00
+#define LCD_DATA_AL_ORIENT 0xA0
 
 //0x80 //pr mir
 //0xE0 //al mir

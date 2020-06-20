@@ -144,18 +144,22 @@ void led_pwm_task(void *pvParameter)
 
 void display_led_pwm_init()
 {
-	ledc_timer_config_t ledc_timer = 
-	{
-		.duty_resolution = LEDC_TIMER_8_BIT, // resolution of PWM duty
-		.freq_hz = 2000,  // frequency of PWM signal
-		.speed_mode = LEDC_HIGH_SPEED_MODE,  // timer mode
-		.timer_num = DISPLAY_LED_TIMER, // timer index
-		//.clk_cfg = LEDC_AUTO_CLK, // Auto select the source clock
+	ledc_timer_config_t ledc_timer = {
+		.duty_resolution = LEDC_TIMER_8_BIT,
+		  // resolution of PWM duty
+		.freq_hz = 2000,
+		                       // frequency of PWM signal
+		.speed_mode = LEDC_HIGH_SPEED_MODE, 
+		           // timer mode
+		.timer_num = DISPLAY_LED_TIMER,
+		             // timer index
+		//.clk_cfg = LEDC_AUTO_CLK,              // Auto select the source clock
 	};
-	ledc_timer_config(&ledc_timer); // Set configuration of timer0 for high speed channels
+	// Set configuration of timer0 for high speed channels
+	ledc_timer_config(&ledc_timer);
 
-	ledc_channel_config_t ledc_channel = 
-	{
+	ledc_channel_config_t ledc_channel = {
+    
 		.channel = DISPLAY_LED_PWM_CHANNEL,
 		.duty = 0,
 		.gpio_num = DISPLAY_LED_GPIO,
@@ -163,6 +167,7 @@ void display_led_pwm_init()
 		.hpoint = 0,
 		.intr_type = LEDC_INTR_FADE_END,
 		.timer_sel = DISPLAY_LED_TIMER,
+    
 	};
 
 	ledc_channel_config(&ledc_channel);

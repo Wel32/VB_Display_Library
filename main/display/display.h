@@ -36,10 +36,13 @@ bool crop_rect_within_screen(rect* r);
 bool check_rect_direction(rect* r);
 bool check_equal_rects(rect* r1, rect* r2);
 
+bool check_valid_obj(draw_obj* obj);
+
 void common_draw(draw_obj_list draw_buffer, rect mask);
 
 void redraw_all(draw_obj_list draw_buffer);
 void redraw_group(draw_obj_list draw_buffer, uint8_t first_layer, uint8_t end_layer);
+void redraw_group_with_lower_layers_only(draw_obj_list draw_buffer, uint8_t first_ayer, uint8_t end_layer);
 
 
 void move_rect_to_new_xy(rect *r, int16_t new_x, int16_t new_y);

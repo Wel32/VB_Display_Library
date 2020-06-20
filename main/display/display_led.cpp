@@ -56,27 +56,26 @@ void lcdOn()
 
 void UserLcdOff()
 {
-	if (display_user_brightness == NULL) *display_user_brightness = 0;
+	if (display_user_brightness != NULL) *display_user_brightness = 0;
 	lcdOn();
 }
 void UserLcdOn()
 {
-	if (display_user_brightness == NULL) *display_user_brightness = 100;
+	if (display_user_brightness != NULL) *display_user_brightness = 100;
 	lcdOn();
 }
 
-void UserLcdSetBrightness(uint8_t value)
+void UserLcdSetBrightnessQuietly(uint8_t value)
 {
 	clamp_max(value, 100);
-	if (display_user_brightness == NULL) *display_user_brightness = value;
-	lcdOn();
+	if (display_user_brightness != NULL) *display_user_brightness = value;
 }
 
-void UserLcdTrimBrightness(uint8_t value)
+void UserLcdTrimBrightnessQuietly(uint8_t value)
 {
 	clamp_max(value, 100);
 	
-	if (display_user_brightness == NULL) 
+	if (display_user_brightness != NULL) 
 	{
 		if (value < *display_system_brightness)
 		{
@@ -84,13 +83,17 @@ void UserLcdTrimBrightness(uint8_t value)
 		}
 		else *display_user_brightness = 100;
 	}
-	
-	lcdOn();
 }
 
 
-void UserLcdSetBrightnessQuietly(uint8_t value)
+void UserLcdSetBrightness(uint8_t value)
 {
-	clamp_max(value, 100);
-	if (display_user_brightness == NULL) *display_user_brightness = value;
+	UserLcdSetBrightnessQuietly(value);
+	lcdOn();
+}
+
+void UserLcdTrimBrightness(uint8_t value)
+{
+	UserLcdTrimBrightnessQuietly(value);
+	lcdOn();
 }

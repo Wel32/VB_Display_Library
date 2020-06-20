@@ -280,14 +280,23 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 
 	pdrl = draw_list;
 	
-	bool hidden_drawing = 1;
-	uint8_t internal_hide_drawing_layers = (hide_drawing_layers != NULL) ? (*hide_drawing_layers) : 1;
+	uint8_t internal_hide_drawing_layers;
+	
+	if (hide_drawing_layers != NULL) internal_hide_drawing_layers = *hide_drawing_layers;
+	else
+	{
+#ifdef ENABLE_FRAGMEMT_DRAWING
+		if (draw_buffer.end_fragments_layer > draw_buffer.start_fragments_layer) internal_hide_drawing_layers = draw_buffer.end_fragments_layer;
+		else
+#endif
+			internal_hide_drawing_layers = 1;
+	}
+			
+	
 
 	uint8_t draw_layers = 0;
 	for (uint8_t i = 0; i < layers; i++, img_list++)
 	{
-		if (i >= internal_hide_drawing_layers) hidden_drawing = 0;
-		
 		if ( ((uint8_t)((img_list->color)>>24)) == 255 || img_list->obj_type >= TVOID) continue;
 
 		common_str_init(pdrl, img_list->pos, mask);
@@ -314,7 +323,7 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 
 	if (!draw_layers) return;
 
-	if (hidden_drawing) lcdImmediatelyOff();  //lcdOff();
+	if (draw_buffer.elem_cnt <= internal_hide_drawing_layers) lcdImmediatelyOff();   //lcdOff();
 	
 #if ORIENTATIONS_COUNT == 4 || ORIENTATIONS_COUNT == 2
 		uint8_t pixel_buf[max1(DISPLAY_LONG_SIDE_SIZE, DISPLAY_SHORT_SIDE_SIZE) * 3];
@@ -357,7 +366,7 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 
 	lcd_end_transfer();
 
-	if (hidden_drawing) lcdOn();
+	if (draw_buffer.elem_cnt == internal_hide_drawing_layers) lcdOn();
 	
 	for (uint8_t i = 0; i < draw_layers; i++)
 	{
@@ -385,13 +394,7 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 	
 	for (uint8_t layer = draw_buffer.start_fragments_layer; layer < draw_buffer.end_fragments_layer; layer++)
 	{
-		if (!check_rect_direction(&draw_buffer.obj[layer].pos))
-		{
-			internal_common_draw(draw_buffer, mask);
-			return;
-		}
-		
-		rect part_mask = internal_min_rect(draw_buffer.obj[layer].pos, mask);
+		rect part_mask = min_rect(draw_buffer.obj[layer].pos, mask);
 		internal_common_draw(draw_buffer, part_mask);
 	}
 }
@@ -410,9 +413,21 @@ void redraw_all(draw_obj_list draw_buffer)
 }
 
 
+void redraw_group_with_lower_layers_only(draw_obj_list draw_buffer, uint8_t first_ayer, uint8_t end_layer)
+{
+	if (first_ayer >= draw_buffer.elem_cnt || end_layer > draw_buffer.elem_cnt) return;
+
+	for (uint8_t i = first_ayer; i < end_layer; i++)
+	{
+		draw_buffer.elem_cnt = i + 1;
+		common_draw(draw_buffer, draw_buffer.obj[i].pos);
+	}
+}
+
+
 void redraw_group(draw_obj_list draw_buffer, uint8_t first_ayer, uint8_t end_layer)
 {
-	if (first_ayer >= draw_buffer.elem_cnt || end_layer >= draw_buffer.elem_cnt) return;
+	if (first_ayer >= draw_buffer.elem_cnt || end_layer > draw_buffer.elem_cnt) return;
 	
 	uint8_t draw_buf_end_layer = draw_buffer.elem_cnt;
 
@@ -451,6 +466,11 @@ draw_obj make_void_obj()
 	return res;
 }
 
+
+bool check_valid_obj(draw_obj* obj)
+{
+	return obj->obj_type != TVOID;
+}
 
 
 void clear_screen_data(draw_obj_list* dl)
@@ -528,17 +548,11 @@ void _update_img(draw_obj_list draw_buffer, uint8_t img_layer, draw_obj* new_img
 				part_mask = cur_img2->pos;
 				continue_cycle = 0;
 			}
-			else if (!check_rect_direction(&draw_buffer.obj[layer].pos))
-			{
-				part_mask = cur_img2->pos;
-				continue_cycle = 0;
-			}
 			else
 			{
 				if (layer >= draw_buffer.end_fragments_layer) break;
 						
-				part_mask = internal_min_rect(draw_buffer.obj[layer].pos, cur_img2->pos);
-				
+				part_mask = min_rect(draw_buffer.obj[layer].pos, cur_img2->pos);
 				if (!check_rect_direction(&part_mask)) continue;
 			}
 #else

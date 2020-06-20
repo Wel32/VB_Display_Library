@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../draw.h"
-
+//#include "ESP32-upng-master/upng.h"
 
 
 typedef struct {
@@ -29,6 +29,9 @@ typedef struct {
 #define BMP_BMPC 0
 #define BMP_EMBED_BMP (1<<11)
 #define BMP_FILE (2<<11)
+#ifdef USER_FILESYSTEM
+#define BMP_FROM_USER_FS (3<<11)
+#endif
 
 
 typedef struct
@@ -58,5 +61,7 @@ draw_obj make_bmp_from_tImage(const tImage* img, int16_t x, int16_t y, uint32_t 
 draw_obj make_embed_bmp(const char* bmpfile_start_pointer, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 draw_obj make_file_bmp_from_file(const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
-
+#ifdef USER_FILESYSTEM
+draw_obj make_bmp_from_user_filesystem(const char *file_name, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+#endif
 

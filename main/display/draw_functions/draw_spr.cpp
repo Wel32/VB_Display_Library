@@ -2,16 +2,32 @@
 #include "draw_spr.h"
 
 
+#ifdef CORR_GAMMA1
+#define INTR_CORR_GAMMA1 CORR_GAMMA1
+#else
+#define INTR_CORR_GAMMA1 0
+#endif#ifdef CORR_GAMMA2
+#define INTR_CORR_GAMMA2 CORR_GAMMA2
+#else
+#define INTR_CORR_GAMMA2 0
+#endif
+
 
 inline uint8_t conv_data_color(uint8_t data_color, uint8_t options)
 {
-	if (options&(CORR_GAMMA1 | CORR_GAMMA2))
+	if (options&(INTR_CORR_GAMMA1 | INTR_CORR_GAMMA2))
 	{
 		uint8_t inv_option = options&(INVERT_CORR_GAMMA | DRAW_INV_TRANSPARENCY);
 		if (inv_option == INVERT_CORR_GAMMA || inv_option == DRAW_INV_TRANSPARENCY) data_color = 240 - data_color;
 		
-		if (options&CORR_GAMMA1) data_color = inverted_tFont_gamma1[data_color];
-		else data_color = inverted_tFont_gamma2[data_color];
+		if (options&INTR_CORR_GAMMA1) data_color = inverted_tFont_gamma1[data_color];
+#ifdef CORR_GAMMA2
+		else 
+#if INTR_CORR_GAMMA1 == 0
+			if (options&INTR_CORR_GAMMA2)
+#endif
+			data_color = inverted_tFont_gamma2[data_color];
+#endif
 		
 		if (options&INVERT_CORR_GAMMA) data_color = 240 - data_color;
 	}

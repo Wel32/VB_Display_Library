@@ -67,12 +67,18 @@ void bmp_str_init(internal_draw_obj* img)
 	{
 	case BMP_FILE:
 	case BMP_EMBED_BMP:
+#ifdef USER_FILESYSTEM
+	case BMP_FROM_USER_FS:
+#endif
 		if ((img->img_width_elem) & 0x03)
 		{
 			img->img_width_elem CLRBITS 0x03;
 			img->img_width_elem += 4;
 		}
+		
+		img->options ^= DRAW_INV_COLOR;
 		break;
+		
 	case BMP_BMPC: break;
 	default:
 		img->obj_type = TVOID;
@@ -82,7 +88,6 @@ void bmp_str_init(internal_draw_obj* img)
 	
 	
 	img->img_width_elem *= elem_per_pixel;
-	
 	if (img->options&BMP_VERTICAL_MIRROR) img->img_cur_pos = calc_start_pos_vertical_mirror(img->img_cur_pos, img->img_cur_y, img->img_width_elem, img->img_height, elem_per_pixel);
 	else img->img_cur_pos = calc_start_pos(img->img_cur_pos, img->img_cur_y, img->img_width_elem, elem_per_pixel);
 	
@@ -112,7 +117,24 @@ void bmp_str_init(internal_draw_obj* img)
 			img->img_cur_pos += offset.full;
 	
 			img->handle = (FILE*) file;
+			
+			break;
 		}
+#ifdef USER_FILESYSTEM
+	case BMP_FROM_USER_FS:
+		{
+			uint32_t data_size = img->img_height * img->img_width_elem;
+			img->handle = (void*) user_open_bmp_source((USER_BMP_SOURCE)(img->handle), 0, data_size);
+			
+			if (img->handle == NULL)
+			{
+				img->obj_type = TVOID;
+				return;
+			}
+			
+			break;
+		}
+#endif
 	}
 	
 	uint8_t temp_trans = img->user_color >> 24;
@@ -147,15 +169,15 @@ void internal_bmp_from_buf_str_memcpy(uint8_t* buf, internal_draw_obj* img, uint
 		
 			if (bmp_inv_color)
 			{
-				clr3 = *imgc++;
-				clr2 = *imgc++;
 				clr1 = *imgc++;
+				clr2 = *imgc++;
+				clr3 = *imgc++;
 			}
 			else
 			{
-				clr1 = *imgc++;
-				clr2 = *imgc++;
 				clr3 = *imgc++;
+				clr2 = *imgc++;
+				clr1 = *imgc++;
 			}
 		
 #if LCD_INV_BRIGHTNESS
@@ -206,15 +228,15 @@ void internal_bmp_from_buf_str_memcpy(uint8_t* buf, internal_draw_obj* img, uint
 		
 				if (bmp_inv_color)
 				{
-					clr3 = *imgc++;
-					clr2 = *imgc++;
 					clr1 = *imgc++;
+					clr2 = *imgc++;
+					clr3 = *imgc++;
 				}
 				else
 				{
-					clr1 = *imgc++;
-					clr2 = *imgc++;
 					clr3 = *imgc++;
+					clr2 = *imgc++;
+					clr1 = *imgc++;
 				}
 			
 				if (img->options & BMP_RGBA) a = *imgc++;
@@ -302,8 +324,18 @@ void bmp_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 				
 				fseek(file, img->img_width_elem - img->buf_cnt_pix * elem_per_pixel, SEEK_CUR);
 			}
+			break;
 		}
-		break;
+#ifdef USER_FILESYSTEM
+	case BMP_FROM_USER_FS:
+		{
+			read_elem_cnt = img->buf_cnt_pix;
+			imgc = (uint8_t*)user_get_bmp_addr(img->handle, img->img_cur_pos, read_elem_cnt);
+		
+			internal_bmp_from_buf_str_memcpy(buf, img, imgc, read_elem_cnt);
+			break;
+		}
+#endif
 	default:
 		imgc = ((uint8_t*)(img->handle)) + (img->img_cur_pos);
 		read_elem_cnt = img->buf_cnt_pix;
@@ -325,6 +357,14 @@ void bmp_str_memclear(internal_draw_obj* img)
 			
 			break;
 		}
+#ifdef USER_FILESYSTEM
+	case BMP_FROM_USER_FS:
+		{
+			user_fclose((USER_FILE**)&img->handle);
+			
+			break;
+		}
+#endif
 	}
 }
 
@@ -418,3 +458,45 @@ draw_obj make_file_bmp_from_file(const char* filename, int16_t x, int16_t y, uin
 	return res;
 }
 
+
+
+
+
+#ifdef USER_FILESYSTEM
+draw_obj make_bmp_from_user_filesystem(const char *file_name, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align)
+{
+	draw_obj res;
+	USER_FILE outfile;
+	
+	if (!user_fopen(file_name, &outfile))
+	{
+		ESP_LOGI("BMP", "file not found %s", file_name);
+		return make_void_obj();
+	}
+	
+	size_t handle_offset = (size_t)outfile.addr;
+	
+	outfile.addr = (const void*) user_open_bmp_source(handle_offset, 0, 34);
+	bmpInfo bmp_info = read_bmp_header((uint8_t*)user_get_bmp_addr(outfile.addr, 0, 34));
+	
+	res.obj_type = TBMP;
+	res.options = options | BMP_FROM_USER_FS;
+	
+	if (bmp_info.imageBitsPerPixel == 24) res.options SETBITS BMP_RGB24;
+	else if (bmp_info.imageBitsPerPixel == 32) res.options SETBITS BMP_ARGB32;
+	else
+	{
+		ESP_LOGI("BMP", "format is not supported %s", file_name);
+		return make_void_obj();
+	}
+  
+	res.pos = get_rect(x, y, bmp_info.imageWidth, bmp_info.imageHeight, align);
+	
+	res.handle = (void*)(handle_offset + bmp_info.imageOffset);
+	res.color = color;
+	
+	user_fclose_source((USER_FILE)res.handle);
+  
+	return res;
+}
+#endif
