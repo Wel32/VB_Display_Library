@@ -31,11 +31,5 @@ public:
 	static into_menu Select();
 };
 
-class Screen4
-{
-public:
-	static into_menu Select();
-};
-
 
 

@@ -35,24 +35,6 @@ void* Screen1::Select()
 	return (into_menu) Screen2::Select;
 }
 
-
-void* Screen4::Select()
-{
-	NEW_SCREEN(screen, screen_data, 50);
-	
-	
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		screen_data[i] = make_bmp_from_tImage(&picture1, 240*(i / 2), 240*(i % 2), 0, 0, LEFT_ALIGN | BOTTOM_ALIGN);
-	}
-	
-	redraw_all(screen);
-
-	while(1) vTaskDelay(2000 / portTICK_PERIOD_MS);
-
-	return (into_menu) Screen2::Select;
-}
-
 void* Screen2::Select()
 {
 	NEW_SCREEN(screen, screen_data, 2);
