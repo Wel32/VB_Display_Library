@@ -89,35 +89,18 @@ uint32_t invert_brightness(uint32_t color)
 	return (color & 0xFF000000) | ((0xFFFFFFFF - color) & 0xFFFFFF);
 }
 
-void lcdInternalSetRect(rect r)
+
+
+inline void lcdInternalSetRect(rect r)
 {
-	uint8_t data[4];
-
-	data[0] = r.x0 >> 8;
-	data[1] = r.x0 & 0xFF;
-	data[2] = r.x1 >> 8;
-	data[3] = r.x1 & 0xFF;
-
-	lcd_send_cmd(0x2A);
-	lcd_send_data(data, 4);
-
-	data[0] = r.y0 >> 8;
-	data[1] = r.y0 & 0xFF;
-	data[2] = r.y1 >> 8;
-	data[3] = r.y1 & 0xFF;
-
-	lcd_send_cmd(0x2B);
-	lcd_send_data(data, 4);
-
-	lcd_send_cmd(0x2C);
+	lcd_select_rect(r.x0, r.y0, r.x1, r.y1);
 }
 
 
 void lcdSetRect(int16_t x, int16_t y, uint16_t width, uint16_t height, uint8_t align)
 {
 	rect r = get_rect(x, y, width, height, align);
-
-	lcdInternalSetRect(r);
+	lcd_select_rect(r.x0, r.y0, r.x1, r.y1);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,12 +310,12 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 	
 #if ORIENTATIONS_COUNT == 4 || ORIENTATIONS_COUNT == 2
 		uint8_t pixel_buf[max1(DISPLAY_LONG_SIDE_SIZE, DISPLAY_SHORT_SIDE_SIZE) * 3];
-	#if LCD_SPI_ENABLE_DMA
+	#if LCD_INTERNAL_SPI_ENABLE_DMA
 		uint8_t pixel_buf2[max1(DISPLAY_LONG_SIDE_SIZE, DISPLAY_SHORT_SIDE_SIZE) * 3];
 	#endif
 #else
 		uint8_t pixel_buf[(DISPLAY_WIDTH)* 3];
-	#if LCD_SPI_ENABLE_DMA
+	#if LCD_INTERNAL_SPI_ENABLE_DMA
 		uint8_t pixel_buf2[(DISPLAY_WIDTH)* 3];
 	#endif
 #endif
@@ -341,7 +324,10 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 	uint8_t* pb_ptr = pixel_buf;
 
 	lcdInternalSetRect(mask);
+	
+#if LCD_SPI_ENABLE_PARTIAL_DATA_TRANSFER
 	lcd_start_transfer(LCD_SEL_DATA);
+#endif
 
 	for (int16_t y = mask.y0; y <= mask.y1; y++)
 	{
@@ -357,14 +343,23 @@ void common_draw(draw_obj_list draw_buffer, rect mask)
 			pdrl->img_cur_y++;
 		}
 
+#if LCD_SPI_ENABLE_PARTIAL_DATA_TRANSFER
 		lcd_send_part_of_data(pb_ptr, mask_width_elem);
+#else
+		for (uint32_t i = 0; i < mask_width_elem; i += 3)
+		{
+			lcd_set_pixel(&pb_ptr[i]);
+		}
+#endif
 
-#if LCD_SPI_ENABLE_DMA
+#if LCD_INTERNAL_SPI_ENABLE_DMA
 		pb_ptr = (pb_ptr == pixel_buf) ? pixel_buf2 : pixel_buf;
 #endif
 	}
 
+#if LCD_SPI_ENABLE_PARTIAL_DATA_TRANSFER
 	lcd_end_transfer();
+#endif
 
 	if (draw_buffer.elem_cnt == internal_hide_drawing_layers) lcdOn();
 	

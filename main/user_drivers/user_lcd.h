@@ -14,6 +14,7 @@ extern "C" {
 
 
 #define LCD_SPI_RATE_kHz 40000
+#define LCD_SPI_ENABLE_PARTIAL_DATA_TRANSFER 1
 #define LCD_SPI_ENABLE_DMA 1
 
 
@@ -28,6 +29,8 @@ extern "C" {
 #define LCD_ALBUM1 0
 
 
+#define LCD_INTERNAL_SPI_ENABLE_DMA (LCD_SPI_ENABLE_DMA && LCD_SPI_ENABLE_PARTIAL_DATA_TRANSFER)
+	
 
 extern spi_device_handle_t spi;
 

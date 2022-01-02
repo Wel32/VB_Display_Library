@@ -9,7 +9,7 @@ extern uint8_t display_is_initialized;
 
 #define LCD_INIT_CMD(cmd,n_arg,post_delay) cmd, n_arg, post_delay
 #define LCD_WR_CMD(cmd) lcd_send_cmd(cmd)
-#define LCD_WR_DATA(data) {uint8_t d = data; lcd_send_data(&d, 1);}
+#define LCD_WR_DATA(...) {uint8_t d[] = {__VA_ARGS__}; lcd_send_data(d, sizeof(d));}
 
 
 
@@ -38,6 +38,8 @@ extern "C" {
 
 void lcd_internal_set_orient(uint8_t orient);
 void lcd_init(uint8_t init_orient);
+void lcd_select_rect(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+void lcd_set_pixel(uint8_t* pix_ptr);
 	
 #if defined(__cplusplus)
 }
