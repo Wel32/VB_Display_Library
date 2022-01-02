@@ -46,7 +46,7 @@ void init_display_orient()
 #if ORIENTATIONS_COUNT == 4
 uint8_t lcdChangeOrient(int8_t step_and_dir)
 {
-	return lcdSetOrient(cycle_through(ScreenOrient, 4, step_and_dir));
+	return lcdSetOrient(modulo_addition(ScreenOrient, step_and_dir, 4));
 }
 #else
 uint8_t lcdChangeOrient()

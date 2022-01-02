@@ -56,12 +56,6 @@ int32_t TICKS_OF_MS(int32_t ticks);
 #define check_user_timer_ms(buf, value) (get_user_timer_value(buf) >= TICKS_OF_MS(value))
 #define set_user_timer_ms(buf, new_value) buf = set_user_timer_value(TICKS_OF_MS(new_value))
 	
-void safe_change_bits_u8(uint8_t *var, uint8_t bits, uint8_t mask);
-void safe_change_bits_u16(uint16_t *var, uint16_t bits, uint16_t mask);
-void safe_change_bits_u32(uint32_t *var, uint32_t bits, uint32_t mask);
-	
-int32_t round_value(float x);
-	
 	
 typedef union
 {
@@ -69,30 +63,6 @@ typedef union
 	uint16_t half[2];
 	uint8_t b[4];
 } i32_databytes_union;
-	
-
-typedef struct
-{
-	uint16_t x;
-	uint16_t y;
-} PiecewiseLinearApproxPointTable;
-
-	uint16_t PiecewiseLlinearApproximation0(uint16_t x, const PiecewiseLinearApproxPointTable* approx_table, uint8_t n_points);
-#define PiecewiseLinearApproximation(x, approx_table) PiecewiseLlinearApproximation0(x, approx_table, sizeof(approx_table) / sizeof(PiecewiseLinearApproxPointTable))
-
-
-uint8_t int_log10(uint16_t var);
-int32_t int32_pow(int32_t x, uint8_t y);
-uint8_t sign_of_num_mod10(int32_t var, uint8_t n_sign);
-
-uint16_t cycle_through(uint16_t cur_value, uint16_t elem_count, int16_t inc);
-
-uint32_t FindHandle(void** list, void* handle, size_t sizeof_data, uint32_t count);
-
-uint16_t find_index_of_mas(void* elem_ptr, void** in_mas, uint16_t mas_elem_count);
-
-
-uint8_t random_regularity(uint8_t *index, uint8_t of_numbers_count);
 
 
 #if defined(__cplusplus)
