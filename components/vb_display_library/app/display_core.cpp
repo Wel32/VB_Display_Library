@@ -623,7 +623,7 @@ void screen_buf_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t la
 	}
 }
 
-void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, bool update_obj_if_exist, bool update_on_the_screen)
+void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, bool update_on_the_screen, bool update_obj_if_exist)
 {
 	uint32_t end_layer = draw_buffer->obj.size();
 	uint32_t req_layer = (layer_num_store != NULL)?(*layer_num_store):end_layer;

@@ -62,7 +62,7 @@ void redraw_group_with_lower_layers_only(draw_obj_list* draw_buffer, uint32_t fi
 
 draw_obj make_void_obj();
 void clear_screen_data(draw_obj_list* dl);
-void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, bool update_obj_if_exist, bool update_on_the_screen);
+void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, bool update_on_the_screen = 1, bool update_obj_if_exist = 1);
 
 void draw_new_obj(draw_obj_list* draw_buffer, uint32_t img_layer);
 void delete_obj(draw_obj_list* draw_buffer, uint32_t img_layer);

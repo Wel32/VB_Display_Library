@@ -9,7 +9,7 @@ void* Screen1::Select()
 {
 	clear_screen_data(Display);
 
-	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL, 1, 1);
+	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
 
 	vTaskDelay(2000 / portTICK_PERIOD_MS);
 
@@ -43,7 +43,7 @@ void* Screen2::Select()
 {
 	clear_screen_data(Display);
 
-	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL, 1, 1);
+	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
 
 	vTaskDelay(2000 / portTICK_PERIOD_MS);
 
@@ -77,7 +77,7 @@ void* Screen2::Select()
 			Display->obj[caption_text.layer].pos.x1,
 			Display->obj[caption_text.layer].pos.y1 - text_size_y,
 			0xFF000000, 0),
-		&rect_layer, 1, 1); //100% transparency
+		&rect_layer); //100% transparency
 
 	
 
@@ -106,7 +106,7 @@ void* Screen3::Select()
 {
 	clear_screen_data(Display);
 
-	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL, 1, 1);
+	set_or_update_obj(Display, make_bmp_from_tImage(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
 
 	vTaskDelay(5000 / portTICK_PERIOD_MS);
 	
@@ -134,7 +134,7 @@ void* Screen3::Select()
 	int16_t text_start_y = (ScreenHeight + caption_text.string_space * (str_count - 1))/2;
 
 	draw_obj text_obj = make_tFont_text(Display, caption_text, ScreenWidth / 2, text_start_y, text_color[text_color_i], 0);
-	set_or_update_obj(Display, text_obj, &caption_text.layer, 1, 1);
+	set_or_update_obj(Display, text_obj, &caption_text.layer);
 	
 
 	uint32_t sprites_start_layer = -1;
@@ -151,7 +151,7 @@ void* Screen3::Select()
 		for (uint8_t i = 0; i < 5; i++)
 		{
 			uint32_t* sprite0_layer_ptr = (sprites_start_layer == -1) ? &sprites_start_layer : NULL;
-			set_or_update_obj(Display, make_sprite(&snow_spr, x0, y0 + dy[i], 0xFFFFFF | ((uint32_t)transparency << 24), 0, CENTER_ALIGN | CENTER_ALIGN), sprite0_layer_ptr, 1, 1);
+			set_or_update_obj(Display, make_sprite(&snow_spr, x0, y0 + dy[i], 0xFFFFFF | ((uint32_t)transparency << 24), 0, CENTER_ALIGN | CENTER_ALIGN), sprite0_layer_ptr);
 
 			x0 += common_dx;
 		}
@@ -179,7 +179,7 @@ void* Screen3::Select()
 		{
 			text_color_i = modulo_addition(text_color_i, +1, sizeof(text_color)/sizeof(uint32_t));
 
-			set_or_update_obj(Display, make_tFont_text(Display, caption_text, ScreenWidth / 2, text_start_y, text_color[text_color_i], 0), &caption_text.layer, 1, 1);
+			set_or_update_obj(Display, make_tFont_text(Display, caption_text, ScreenWidth / 2, text_start_y, text_color[text_color_i], 0), &caption_text.layer);
 		}
 		
 		vTaskDelay(1);
