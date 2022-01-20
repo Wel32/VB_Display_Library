@@ -25,7 +25,7 @@
 #endif
 
 
-#define MAX_LAYERS_TO_BLENDING 20
+#define MAX_LAYERS_TO_BLENDING 100
 #define LCD_INV_BRIGHTNESS 0
 
 

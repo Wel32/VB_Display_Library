@@ -63,15 +63,18 @@ void redraw_group_with_lower_layers_only(draw_obj_list* draw_buffer, uint32_t fi
 draw_obj make_void_obj();
 void clear_screen_data(draw_obj_list* dl);
 void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, bool update_on_the_screen = 1, bool update_obj_if_exist = 1);
+void pin_layer_buffer_to_obj(draw_obj_list* draw_buffer, uint32_t obj_layer, uint32_t* layer_num_store);
+void change_obj_layer(draw_obj_list* draw_buffer, uint32_t obj_layer, uint32_t new_layer);
 
 void draw_new_obj(draw_obj_list* draw_buffer, uint32_t img_layer);
 void delete_obj(draw_obj_list* draw_buffer, uint32_t img_layer);
 void hide_obj(draw_obj_list* draw_buffer, uint32_t img_layer);
 void _update_obj(draw_obj_list* draw_buffer, uint32_t img_layer, draw_obj* new_img);
 void update_obj(draw_obj_list* draw_buffer, uint32_t img_layer, draw_obj new_img);
-void move_obj_to_new_xy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t new_x, int16_t new_y, uint8_t align);
-void move_obj_dxdy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t dx, int16_t dy);
+void move_obj_to_new_xy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t new_x, int16_t new_y, uint8_t align, bool update_on_the_screen = 1);
+void move_obj_dxdy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t dx, int16_t dy, bool update_on_the_screen = 1);
 void align_obj_group(draw_obj_list* draw_buffer, std::vector <uint32_t> &obj_layers_list, int16_t new_x, int16_t new_y, uint8_t align);
+void align_obj_group(std::vector <draw_obj*> &obj_list, int16_t new_x, int16_t new_y, uint8_t align);
 void screen_buf_insert_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer_num_store, uint32_t layer);
 draw_obj* screen_buf_get_obj(draw_obj_list* draw_buffer, uint32_t layer);
 void screen_buf_delete_obj(draw_obj_list* draw_buffer, uint32_t layer);

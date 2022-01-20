@@ -346,16 +346,9 @@ void common_draw(draw_obj_list* draw_buffer, rect mask, uint32_t end_layer)
 
 	if (layers <= internal_hide_drawing_layers) lcdImmediatelyOff();    //lcdOff();
 	
-#if ORIENTATIONS_COUNT == 4 || ORIENTATIONS_COUNT == 2
-		std::vector <uint8_t> pixel_buf(max1(DISPLAY_LONG_SIDE_SIZE, DISPLAY_SHORT_SIDE_SIZE) * 3);
-	#if LCD_SPI_ENABLE_DMA
-		std::vector <uint8_t> pixel_buf2(max1(DISPLAY_LONG_SIDE_SIZE, DISPLAY_SHORT_SIDE_SIZE) * 3);
-	#endif
-#else
-		std::vector <uint8_t> pixel_buf((DISPLAY_WIDTH)* 3);
-	#if LCD_SPI_ENABLE_DMA
-		std::vector <uint8_t> pixel_buf2((DISPLAY_WIDTH)* 3);
-	#endif
+	std::vector <uint8_t> pixel_buf(ScreenWidth * 3);
+#if LCD_SPI_ENABLE_DMA
+	std::vector <uint8_t> pixel_buf2(ScreenWidth * 3);
 #endif
 	
 
@@ -395,7 +388,7 @@ void common_draw(draw_obj_list* draw_buffer, rect mask, uint32_t end_layer)
 		if (str_memclear_func[pdrl->obj_type] != NULL) (*str_memclear_func[pdrl->obj_type])(pdrl);
 	}
 	
-	for (uint32_t i = 0; i < dynamic_obj_alloc.size(); i++) delete dynamic_obj_alloc[i];
+	for (uint32_t i = 0; i < dynamic_obj_alloc.size(); i++) delete[] dynamic_obj_alloc[i];
 	
 	if (string_alloc_buffer != NULL)
 	{
@@ -640,6 +633,30 @@ void set_or_update_obj(draw_obj_list* draw_buffer, draw_obj obj, uint32_t* layer
 	}
 }
 
+void pin_layer_buffer_to_obj(draw_obj_list* draw_buffer, uint32_t obj_layer, uint32_t* layer_num_store)
+{
+	if (obj_layer < draw_buffer->obj.size())
+	{
+		draw_buffer->obj[obj_layer].layer_ptr = layer_num_store;
+	}
+}
+
+void change_obj_layer(draw_obj_list* draw_buffer, uint32_t obj_layer, uint32_t new_layer)
+{
+	if (obj_layer>=draw_buffer->obj.size() || new_layer>=draw_buffer->obj.size() || obj_layer == new_layer) return;
+
+	draw_buffer->obj.emplace(draw_buffer->obj.begin() + new_layer, draw_buffer->obj[obj_layer]);
+
+	uint32_t erase_layer = obj_layer;
+	if (obj_layer > new_layer) erase_layer++;
+	draw_buffer->obj.erase(draw_buffer->obj.begin() + erase_layer);
+
+	uint32_t start_layer = min1(obj_layer, new_layer), end_layer = max1(obj_layer, new_layer);
+	for (uint32_t i=start_layer; i <= end_layer; i++)
+	{
+		if (draw_buffer->obj[i].layer_ptr != NULL) *draw_buffer->obj[i].layer_ptr = i;
+	}
+}
 
 void draw_new_obj(draw_obj_list* draw_buffer, uint32_t img_layer)
 {
@@ -790,7 +807,7 @@ void move_rect_dxdy(rect *r, int16_t dx, int16_t dy)
 }
 
 
-void move_obj_to_new_xy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t new_x, int16_t new_y, uint8_t align)
+void move_obj_to_new_xy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t new_x, int16_t new_y, uint8_t align, bool update_on_the_screen)
 {
 	draw_obj* cur_img = draw_buffer->obj.data() + img_layer;
 	draw_obj new_img = *cur_img;
@@ -799,12 +816,14 @@ void move_obj_to_new_xy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t 
 	new_img.x0 += new_x;
 	new_img.y0 += new_y;
 
+	if (!update_on_the_screen) return;
+
 	if (check_equal_rects(&new_img.pos, &cur_img->pos)) return;
 
 	_update_obj(draw_buffer, img_layer, &new_img);
 }
 
-void move_obj_dxdy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t dx, int16_t dy)
+void move_obj_dxdy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t dx, int16_t dy, bool update_on_the_screen)
 {
 	if (dx == 0 && dy == 0) return;
 
@@ -816,6 +835,8 @@ void move_obj_dxdy(draw_obj_list* draw_buffer, uint32_t img_layer, int16_t dx, i
 	new_img.pos.x1 += dx;
 	new_img.pos.y0 += dy;
 	new_img.pos.y1 += dy;
+
+	if (!update_on_the_screen) return;
 
 	_update_obj(draw_buffer, img_layer, &new_img);
 }
@@ -872,6 +893,30 @@ void align_obj_group(draw_obj_list* draw_buffer, std::vector <uint32_t> &obj_lay
 			draw_buffer->obj[obj_layers_list[i]].pos.y0 += obj_dy;
 			draw_buffer->obj[obj_layers_list[i]].pos.y1 += obj_dy;
 		}
+	}
+}
+
+void align_obj_group(std::vector <draw_obj*> &obj_list, int16_t new_x, int16_t new_y, uint8_t align)
+{
+	rect common_rect = make_void_rect();
+
+	for (uint32_t i = 0; i<obj_list.size(); i++)
+	{
+		common_rect = max_rect(obj_list[i]->pos, common_rect);
+	}
+
+	int16_t dx = new_x - common_rect.x0 - calc_hor_offset(common_rect.x1-common_rect.x0+1, align);
+	int16_t dy = new_y - common_rect.y0 - calc_ver_offset(common_rect.y1-common_rect.y0+1, align);
+
+	for (uint32_t i = 0; i<obj_list.size(); i++)
+	{
+		obj_list[i]->x0 += dx;
+		obj_list[i]->y0 += dy;
+
+		obj_list[i]->pos.x0 += dx;
+		obj_list[i]->pos.x1 += dx;
+		obj_list[i]->pos.y0 += dy;
+		obj_list[i]->pos.y1 += dy;
 	}
 }
 

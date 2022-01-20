@@ -293,7 +293,7 @@ uint32_t alloc_tFont_symbols(draw_obj** buf, tFont_text* text, int16_t obj_x0, i
 
 	if (text->char_space.size()) str_char_space = text->char_space[0];
 
-	for (const wchar_t *c = text->text.data(); ; c++, real_sym_cnt++)
+	for (const wchar_t *c = text->text.data(); ; c++)
 	{
 		while (*c == '\n' || *c == '\0')
 		{
@@ -335,7 +335,7 @@ uint32_t alloc_tFont_symbols(draw_obj** buf, tFont_text* text, int16_t obj_x0, i
 			
 			continue;
 		}
-		if (text_x<0) text_x = 200;
+		
 		new_sym = make_tFont_symbol(*c, text->font, text_x, text_y, color, options, internal_align);
 	
 		if (new_sym.obj_type != TVOID)
@@ -354,7 +354,9 @@ uint32_t alloc_tFont_symbols(draw_obj** buf, tFont_text* text, int16_t obj_x0, i
 				*buf_ptr1++ = new_sym;
 				str_sym_cnt++;
 			}
-		}	
+
+			real_sym_cnt++;
+		}
 	}
 
 	return real_sym_cnt;
@@ -650,7 +652,7 @@ void tFont_text_set_char_space(tFont_text& text, int16_t min_char_space, int16_t
 			str_beg_i = i + 1;
 
 			if (char_space < min_char_space) char_space = min_char_space;
-			if (char_space > min_char_space) char_space = max_char_space;
+			if (char_space > max_char_space) char_space = max_char_space;
 
 			if (past_char_space != char_space)
 			{

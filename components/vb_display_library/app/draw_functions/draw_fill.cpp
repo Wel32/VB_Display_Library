@@ -11,10 +11,6 @@ void fill_str_init(internal_draw_obj* img)
 	img->user_color = (img->user_color & 0xFF000000) | ((0xFFFFFFFF - img->user_color) & 0xFFFFFF);
 #endif
 	
-#if LCD_INV_BRIGHTNESS
-	img->user_color = (img->user_color & 0xFF000000) | ((0xFFFFFFFF - img->user_color) & 0xFFFFFF);
-#endif
-	
 	uint8_t temp_trans = img->user_color >> 24;
 	img->user_data = temp_trans * 256 / 255;
 	
