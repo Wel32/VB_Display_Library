@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "display_datatypes.h"
 
 
@@ -9,28 +8,6 @@
 #include "draw_functions/draw_spr.h"
 #include "draw_functions/draw_tFont.h"
 
-
-
-
-
-
-
-
-
-
-
-typedef enum 
-{
-	TFILL,
-	TBMP,
-	TSPRITE,
-	TFONT,
-	
-	
-	
-	TVOID,
-}
-drobj_type;
 
 
 

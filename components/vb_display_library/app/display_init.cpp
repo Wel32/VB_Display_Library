@@ -5,7 +5,7 @@
 
 
 //Initialize the display
-void display_init(const lcd_display_config_t* display_interface_config, const hal_pwm_channel_t* backlight_config)
+void display_init(const lcd_display_config_t* display_interface_config, const hal_pwm_channel_config_t* backlight_config)
 {
 	ScreenOrient = INIT_SCREEN_ORIENT;
 

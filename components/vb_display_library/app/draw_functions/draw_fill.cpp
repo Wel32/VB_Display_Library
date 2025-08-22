@@ -3,26 +3,65 @@
 
 
 
-
-void fill_str_init(internal_draw_obj* img)
+VBDL_Fill::VBDL_Fill(int16_t _x0, int16_t _y0, int16_t _x1, int16_t _y1, uint32_t _color, uint8_t _options)
 {
-	if (img->options&DRAW_INV_COLOR) img->user_color = invert_color(img->user_color);
-#if LCD_INV_BRIGHTNESS
-	img->user_color = (img->user_color & 0xFF000000) | ((0xFFFFFFFF - img->user_color) & 0xFFFFFF);
-#endif
+	if (_x1 > _x0)
+	{
+		pos.x0 = _x0;
+		pos.x1 = _x1;
+	}
+	else
+	{
+		pos.x0 = _x1;
+		pos.x1 = _x0;
+	}
 	
-	uint8_t temp_trans = img->user_color >> 24;
-	img->user_data = temp_trans * 256 / 255;
+	if (_y1 > _y0)
+	{
+		pos.y0 = _y0;
+		pos.y1 = _y1;
+	}
+	else
+	{
+		pos.y0 = _y1;
+		pos.y1 = _y0;
+	}
+
+	//x0 = pos.x0;
+	//y0 = pos.y0;
 	
-#if LCD_SPI_ENABLE_DMA
-	img->user_data |= ((img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 2 : 3)<<24;
-#else 
-	img->user_data |= ((img->layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 1 : 2)<<24;
-#endif
+	color = _color;
+	options = _options;
 }
 
+VBDL_Fill::VBDL_Fill(rect _pos, uint32_t _color, uint8_t _options)
+{
+	pos = _pos;
+	color = _color;
+	options = _options;
+}
+void VBDL_Fill::fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options)
+{
+	VBDL_InternalPushLayer img(this, mask, layer_options);
+	if (!img.is_overlap()) return;
 
-void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img)
+		if (img.obj_handle->options&DRAW_INV_COLOR) img.user_color = VBDisplay::invert_color(img.user_color);
+	#if LCD_INV_BRIGHTNESS
+		img.user_color = (img.user_color & 0xFF000000) | ((0xFFFFFFFF - img.user_color) & 0xFFFFFF);
+	#endif
+		
+		uint8_t temp_trans = img.user_color >> 24;
+		img.user_data = temp_trans * 256 / 255;
+		
+	#if LCD_SPI_ENABLE_DMA
+		img.user_data |= ((img.layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 2 : 3)<<24;
+	#else 
+		img.user_data |= ((img.layer_options&LAYER_OPTIONS_SINGLE_LAYER) ? 1 : 2)<<24;
+	#endif
+
+	img.confirm(buf);
+}
+void VBDL_Fill::fill_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 {
 	if (img->user_data < (1 << 24)) return;
 	
@@ -72,50 +111,9 @@ void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img)
 		}
 	}
 }
-
-
-
-void fill_str_memclear(internal_draw_obj* img)
+void VBDL_Fill::fill_str_memclear(internal_draw_obj* img)
 {
+		
 }
-
-
-
-
-
-draw_obj make_fill(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint32_t color, uint8_t options)
-{
-	draw_obj res = make_void_obj();
-	
-	if (x1 > x0)
-	{
-		res.pos.x0 = x0;
-		res.pos.x1 = x1;
-	}
-	else
-	{
-		res.pos.x0 = x1;
-		res.pos.x1 = x0;
-	}
-	
-	if (y1 > y0)
-	{
-		res.pos.y0 = y0;
-		res.pos.y1 = y1;
-	}
-	else
-	{
-		res.pos.y0 = y1;
-		res.pos.y1 = y0;
-	}
-	
-	res.obj_type = TFILL;
-	res.handle = NULL;
-	res.color = color;
-	res.options = options;
-  
-	return res;
-}
-
 
 

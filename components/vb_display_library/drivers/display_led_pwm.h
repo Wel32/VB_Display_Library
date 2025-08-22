@@ -17,7 +17,7 @@ extern "C" {
 
 
 
-void display_led_pwm_init(const hal_pwm_channel_t* backlight_pwm_channel);
+void display_led_pwm_init(const hal_pwm_channel_config_t* backlight_pwm_channel);
 void display_led_set_brightness(uint8_t value);
 extern uint8_t immediately_off;
 	

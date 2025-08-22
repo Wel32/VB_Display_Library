@@ -20,7 +20,7 @@ extern uint8_t* display_system_brightness;
 extern "C" {
 #endif
 	
-void display_init(const lcd_display_config_t* display_interface_config, const hal_pwm_channel_t* backlight_config);
+void display_init(const lcd_display_config_t* display_interface_config, const hal_pwm_channel_config_t* backlight_config);
 	
 #if ORIENTATIONS_COUNT == 4 || ORIENTATIONS_COUNT == 2
 	uint8_t lcdSetOrient(uint8_t orient);

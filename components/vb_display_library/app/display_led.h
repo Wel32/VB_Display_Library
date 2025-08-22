@@ -9,7 +9,7 @@
 
 
 
-void lcd_led_init(const hal_pwm_channel_t* backlight_config);
+void lcd_led_init(const hal_pwm_channel_config_t* backlight_config);
 void lcdOff();
 void lcdOn();
 void lcdImmediatelyOff();

@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 extern const hal_pwm_timer_config_t* lcd_bl_pwm_timer;
-extern const hal_pwm_channel_t* lcd_bl_pwm_channel;
+extern const hal_pwm_channel_config_t* lcd_bl_pwm_channel;
 extern const lcd_display_config_t* lcd_gpio_channel;
 
 

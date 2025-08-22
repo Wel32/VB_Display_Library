@@ -9,7 +9,7 @@ uint8_t* display_system_brightness = NULL;
 
 
 
-void lcd_led_init(const hal_pwm_channel_t* backlight_config)
+void lcd_led_init(const hal_pwm_channel_config_t* backlight_config)
 {
 	assert(display_system_brightness);
 	

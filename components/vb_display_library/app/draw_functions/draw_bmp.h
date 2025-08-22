@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../draw.h"
+#include "../display_datatypes.h"
 
 
 
@@ -28,14 +28,6 @@ typedef struct {
 #define BMP_RGB8 (4<<8)
 #define BMP_ARGB32 (1<<8)
 
-#define BMP_SOURCE_MASK (7<<11)
-#define BMP_BMPC 0
-#define BMP_EMBED_BMP (1<<11)
-#define BMP_FILE (2<<11)
-#ifdef USER_FILESYSTEM
-#define BMP_FROM_USER_FS (3<<11)
-#endif
-
 #define BMP_COLORTYPE_MASK (3<<14)
 #define BMP_INDEXED_8BIT (1<<14)
 #define BMP_INDEXED_4BIT (2<<14)
@@ -56,19 +48,65 @@ typedef struct
 bmpInfo read_bmp_header(uint8_t * header);
 
 
+#if defined(__cplusplus)
 
+class VBDL_tImage : public draw_obj
+{
+public:
+	VBDL_tImage(const tImage* img, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
-void bmp_str_init(internal_draw_obj* img);
-void bmp_str_memcpy(uint8_t* buf, internal_draw_obj* img);
-void bmp_str_memclear(internal_draw_obj* img);
+protected:
+	void* handle;
+	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
+	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
+	void fill_str_memclear(internal_draw_obj* img) override;
+    //~VBDL_Fill() override;
+};
 
+class VBDL_Embed_BMP : public draw_obj
+{
+public:
+	VBDL_Embed_BMP(const char* bmpfile_start_pointer, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+	//VBDL_BMP(const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
+protected:
+	void* handle;
+	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
+	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
+	void fill_str_memclear(internal_draw_obj* img) override;
+    //~VBDL_Fill() override;
+};
 
+class VBDL_BMP_from_file : public draw_obj
+{
+public:
+	VBDL_BMP_from_file(const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
-draw_obj make_bmp_from_tImage(const tImage* img, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
-draw_obj make_embed_bmp(const char* bmpfile_start_pointer, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
-draw_obj make_file_bmp_from_file(const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+protected:
+	void* handle;
+	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
+	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
+	void fill_str_memclear(internal_draw_obj* img) override;
+    //~VBDL_Fill() override;
+};
+
 
 #ifdef USER_FILESYSTEM
-draw_obj make_bmp_from_user_filesystem(const char *file_name, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+class VBDL_BMP_from_user_filesystem : public draw_obj
+{
+public:
+	VBDL_BMP_from_user_filesystem(ufs_partition_t* partition, const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+	~VBDL_BMP_from_user_filesystem();
+
+protected:
+	USER_FILE img_data;
+	void* handle;
+	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
+	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
+	void fill_str_memclear(internal_draw_obj* img) override;
+    //~VBDL_Fill() override;
+};
+#endif
+
+
 #endif

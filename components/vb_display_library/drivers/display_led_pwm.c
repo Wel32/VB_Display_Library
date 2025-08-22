@@ -1,7 +1,7 @@
 #include "display_led_pwm.h"
 
 
-hal_pwm_channel_t* backlight_pwm_channel = NULL;
+hal_pwm_channel_config_t* backlight_pwm_channel = NULL;
 SemaphoreHandle_t xChangeDisplayLedPWM = NULL;
 
 uint8_t target_brightness = 0, immediately_off = 0;
@@ -134,11 +134,11 @@ void led_pwm_task(void *pvParameter)
 
 
 
-void display_led_pwm_init(const hal_pwm_channel_t* init_pwm_channel)
+void display_led_pwm_init(const hal_pwm_channel_config_t* init_pwm_channel)
 {
 	if (init_pwm_channel!=NULL)
 	{
-		backlight_pwm_channel = (hal_pwm_channel_t*) init_pwm_channel;
+		backlight_pwm_channel = (hal_pwm_channel_config_t*) init_pwm_channel;
 
 		xTaskCreate(&led_pwm_task, "led_pwm_task", 1000, NULL, 15, NULL);
 	}
