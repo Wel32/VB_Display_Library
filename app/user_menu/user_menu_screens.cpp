@@ -7,7 +7,7 @@ void* Screen1::Select()
 {
 	Display.clear_data();
 
-	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
+	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN));
 
 	vTaskDelay(2000 / portTICK_PERIOD_MS);
 
@@ -24,7 +24,7 @@ void* Screen1::Select()
 
 	VBDL_tFontText::text_autowrap(caption_text, text_place_width, 0, 2, 2);
 	
-	Display.set_or_update_obj(std::make_unique<VBDL_tFontText>(caption_text, text_x0, text_y0, 0xFF0000, 0), NULL);
+	Display.set_or_update_obj(std::make_unique<VBDL_tFontText>(caption_text, text_x0, text_y0, 0xFF0000, 0));
 
 	vTaskDelay(2000 / portTICK_PERIOD_MS);
 
@@ -35,7 +35,7 @@ void* Screen2::Select()
 {
 	Display.clear_data();
 
-	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
+	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN));
 
 	vTaskDelay(2000 / portTICK_PERIOD_MS);
 
@@ -88,7 +88,7 @@ void* Screen3::Select()
 {
 	Display.clear_data();
 
-	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN), NULL);
+	Display.set_or_update_obj(std::make_unique<VBDL_tImage>(&picture1, 0, 0, 0, 0, LEFT_ALIGN | BOTTOM_ALIGN));
 
 	vTaskDelay(5000 / portTICK_PERIOD_MS);
 	

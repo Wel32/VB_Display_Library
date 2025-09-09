@@ -582,11 +582,22 @@ inline rect VBDL_tFontText::internal_fill_str_init(std::vector <internal_draw_ob
 
 
 
-
 void VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_cnt_store, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t _color, uint8_t _options)
 {
-	uint32_t default_layer_store = (uint32_t)(-1);
-	uint32_t* internal_layer_ptr = (layer_cnt_store != NULL) ? layer_cnt_store : (&default_layer_store);
+	set_or_update_text(display, layer_cnt_store, -1, text, init_text_x0, init_text_y0, _color, _options);
+}
+uint32_t VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, uint32_t desired_layer, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t _color, uint8_t _options)
+{
+	if (!text.text.size()) return display.set_or_update_obj(display.make_void_obj(), layer_num_handle, desired_layer);
+
+	uint32_t disp_obj_count = display.obj_count();
+	uint32_t layer = (layer_num_handle != NULL) ? (*layer_num_handle) : desired_layer;
+
+	if (layer >= disp_obj_count)
+	{
+		layer = disp_obj_count;
+		display.screen_buf_insert_obj(display.make_void_obj(), layer_num_handle);
+	}
 
 	uint8_t init = 0;
 	int16_t y = -1;
@@ -594,16 +605,6 @@ void VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_cnt_
 	int16_t text_y0 = init_text_y0;
 	uint32_t string_n = 0;
 	int16_t str_char_space = 0;
-
-	if (!text.text.size())
-	{
-		display.delete_obj(*internal_layer_ptr);
-		*internal_layer_ptr = (uint32_t)(-1);
-		return;
-	}
-
-	if (*internal_layer_ptr >= display.obj_count()) display.screen_buf_insert_obj(display.make_void_obj(), internal_layer_ptr, (uint32_t)(-1));
-	uint32_t layer = *internal_layer_ptr;
 	
 	rect old_rect = display.screen_buf_get_obj(layer)->pos;
 	rect common_new_rect;
@@ -646,7 +647,8 @@ void VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_cnt_
 	new_text_obj->pos = common_new_rect;
 
 	display.screen_buf_update_obj(std::move(new_text_obj), layer);
-	display.pin_layer_buffer_to_obj(layer, layer_cnt_store);
+
+	return layer + 1;
 }
 
 void VBDL_tFontText::draw_tFont_string(VBDisplay &display, uint32_t layer, rect old_rect, tFont font, int16_t char_space, const wchar_t* str, uint32_t sym_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)

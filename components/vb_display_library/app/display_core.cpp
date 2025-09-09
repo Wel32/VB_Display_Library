@@ -265,6 +265,16 @@ rect VBDisplay::min_rect(rect r1, rect r2)
 	return min_rect_no_valid_check(r1, r2);
 }
 
+uint16_t VBDisplay::get_obj_width(draw_obj* obj)
+{
+	if (obj != NULL) return obj->pos.x1 - obj->pos.x0 + 1;
+	return 0;
+}
+uint16_t VBDisplay::get_obj_height(draw_obj* obj)
+{
+	if (obj != NULL) return obj->pos.y1 - obj->pos.y0 + 1;
+	return 0;
+}
 
 
 
@@ -460,7 +470,12 @@ void VBDisplay::common_draw(rect mask, uint32_t end_layer)
 	
 	for (uint32_t layer = draw_buffer.start_fragments_layer; layer < draw_buffer.end_fragments_layer; layer++)
 	{
-		rect part_mask = min_rect(draw_buffer.obj[layer]->pos, mask);
+		if (layer >= draw_buffer.obj.size()) break;
+		if (!draw_buffer.obj[layer]) continue;
+
+		draw_obj* temp = draw_buffer.obj[layer].get();
+		rect part_mask = min_rect(temp->pos, mask);
+		
 		internal_common_draw(part_mask, end_layer);
 	}
 }
@@ -537,21 +552,21 @@ void VBDisplay::clear_data()
 
 
 
-void VBDisplay::screen_buf_insert_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_store, uint32_t layer)
+void VBDisplay::screen_buf_insert_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_handle, uint32_t layer)
 {
 	if (!obj) return;
 
-	obj->layer_ptr = layer_num_store;
+	obj->layer_ptr = layer_num_handle;
 
 	if (layer >= draw_buffer.obj.size())
 	{
 		draw_buffer.obj.push_back(std::move(obj));
-		if (layer_num_store!=NULL) *layer_num_store = draw_buffer.obj.size()-1;
+		if (layer_num_handle!=NULL) *layer_num_handle = draw_buffer.obj.size()-1;
 
 		return;
 	}
 	
-	if (layer_num_store!=NULL) *layer_num_store = layer;
+	if (layer_num_handle!=NULL) *layer_num_handle = layer;
 
 	draw_buffer.obj.emplace(draw_buffer.obj.begin() + layer, std::move(obj));
 
@@ -597,30 +612,35 @@ void VBDisplay::screen_buf_update_obj(std::unique_ptr<draw_obj> obj, uint32_t la
 	}
 }
 
-void VBDisplay::set_or_update_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_store, bool update_on_the_screen, bool update_obj_if_exist)
+uint32_t VBDisplay::set_or_update_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_handle, uint32_t desired_layer, bool update_on_the_screen)
 {
-	uint32_t end_layer = draw_buffer.obj.size();
-	uint32_t req_layer = (layer_num_store != NULL)?(*layer_num_store):end_layer;
+	uint32_t req_layer = (layer_num_handle != NULL)?(*layer_num_handle):desired_layer;
 
-	if (req_layer < end_layer && update_obj_if_exist)
+	if (req_layer < draw_buffer.obj.size())
 	{
-		if (update_on_the_screen) update_obj_on_screen(std::move(obj), *layer_num_store);
-		else screen_buf_update_obj(std::move(obj), *layer_num_store);
+		if (update_on_the_screen) update_obj(std::move(obj), req_layer);
+		else screen_buf_update_obj(std::move(obj), req_layer);
+
+		return req_layer + 1;
 	}
 	else
 	{
-		if (!obj) return;
+		if (!obj) return desired_layer;
 
-		screen_buf_insert_obj(std::move(obj), layer_num_store, req_layer);
-		if (update_on_the_screen) common_draw((draw_buffer.obj[draw_buffer.obj.size()-1]).get()->pos, 0xFFFFFFFF);
+		if (desired_layer > draw_buffer.obj.size()) desired_layer = draw_buffer.obj.size();
+
+		screen_buf_insert_obj(std::move(obj), layer_num_handle, desired_layer);
+		if (update_on_the_screen) common_draw((draw_buffer.obj[desired_layer]).get()->pos, 0xFFFFFFFF);
+
+		return desired_layer + 1;
 	}
 }
 
-void VBDisplay::pin_layer_buffer_to_obj(uint32_t obj_layer, uint32_t* layer_num_store)
+void VBDisplay::pin_layer_handle_to_obj(uint32_t obj_layer, uint32_t* layer_num_handle)
 {
 	if (obj_layer < draw_buffer.obj.size())
 	{
-		draw_buffer.obj[obj_layer]->layer_ptr = layer_num_store;
+		draw_buffer.obj[obj_layer]->layer_ptr = layer_num_handle;
 	}
 }
 
@@ -628,11 +648,10 @@ void VBDisplay::change_obj_layer(uint32_t obj_layer, uint32_t new_layer)
 {
 	if (obj_layer>=draw_buffer.obj.size() || new_layer>=draw_buffer.obj.size() || obj_layer == new_layer) return;
 
-	draw_buffer.obj.emplace(draw_buffer.obj.begin() + new_layer, std::move(draw_buffer.obj[obj_layer]));
+	std::unique_ptr moving_obj = std::move(draw_buffer.obj[obj_layer]);
+	draw_buffer.obj.erase(draw_buffer.obj.begin() + obj_layer);
 
-	uint32_t erase_layer = obj_layer;
-	if (obj_layer > new_layer) erase_layer++;
-	draw_buffer.obj.erase(draw_buffer.obj.begin() + erase_layer);
+	draw_buffer.obj.emplace(draw_buffer.obj.begin() + new_layer, std::move(moving_obj));
 
 	uint32_t start_layer = min1(obj_layer, new_layer), end_layer = max1(obj_layer, new_layer);
 	for (uint32_t i=start_layer; i <= end_layer; i++)
@@ -641,7 +660,7 @@ void VBDisplay::change_obj_layer(uint32_t obj_layer, uint32_t new_layer)
 	}
 }
 
-void VBDisplay::draw_new_obj(uint32_t img_layer)
+void VBDisplay::redraw_obj(uint32_t img_layer)
 {
 	if (img_layer >= draw_buffer.obj.size()) return;
 	
@@ -667,7 +686,7 @@ void VBDisplay::hide_obj(uint32_t img_layer)
 }
 
 
-void VBDisplay::update_obj_on_screen(std::unique_ptr<draw_obj> new_obj, uint32_t img_layer)
+void VBDisplay::update_obj(std::unique_ptr<draw_obj> new_obj, uint32_t img_layer)
 {
 	if (img_layer >= draw_buffer.obj.size()) return;
 
@@ -683,7 +702,7 @@ void VBDisplay::update_obj_on_screen(std::unique_ptr<draw_obj> new_obj, uint32_t
 	if (new_obj_dataptr != NULL) new_pos = new_obj_dataptr->pos;
 	else new_pos = void_rect;
 
-	if (check_valid_rect(&new_pos)) screen_buf_update_obj(std::move(new_obj), img_layer);
+	screen_buf_update_obj(std::move(new_obj), img_layer);
 	update_area_on_screen(cur_pos, new_pos, img_layer);
 }
 
@@ -762,6 +781,28 @@ void VBDisplay::update_area_on_screen(rect cur_pos, rect new_pos, uint32_t img_l
 	if (check_valid_rect(&new_pos)) common_draw(new_pos, 0xFFFFFFFF);
 }
 
+
+void VBDisplay::move_obj_to_new_xy(draw_obj* obj, int16_t new_x, int16_t new_y, uint8_t align)
+{
+	if (obj == NULL) return;
+
+	rect cur_pos = obj->pos;
+
+    obj->pos=get_rect(new_x, new_y, cur_pos.x1 - cur_pos.x0+1, cur_pos.y1 - cur_pos.y0+1, align);
+	obj->x0 += new_x;
+	obj->y0 += new_y;
+}
+void VBDisplay::move_obj_dxdy(draw_obj* obj, int16_t dx, int16_t dy)
+{
+	if ((dx == 0 && dy == 0) || obj == NULL) return;
+
+	obj->x0 += dx;
+	obj->y0 += dy;
+	obj->pos.x0 += dx;
+	obj->pos.x1 += dx;
+	obj->pos.y0 += dy;
+	obj->pos.y1 += dy;
+}
 
 void VBDisplay::move_obj_to_new_xy(uint32_t img_layer, int16_t new_x, int16_t new_y, uint8_t align, bool update_on_the_screen)
 {

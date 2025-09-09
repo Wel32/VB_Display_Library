@@ -34,19 +34,21 @@ struct tFontText
 
 	tFontText(tFont init_font = {0, NULL}, uint8_t init_align = CENTER_ALIGN | CENTER_ALIGN, int16_t init_char_space = 0, int16_t init_string_space = 30)
 	{
-    	font = init_font;
-    	align = init_align;
-    	string_space = init_string_space;
-    	if (init_char_space) char_space.push_back(init_char_space);
+		font = init_font;
+		align = init_align;
+		string_space = init_string_space;
+		if (init_char_space) char_space.push_back(init_char_space);
 	}
 	tFontText(wstring &str, tFont init_font = {0, NULL}, uint8_t init_align = CENTER_ALIGN | CENTER_ALIGN, int16_t init_char_space = 0, int16_t init_string_space = 30)
-  	{
-    	text = str;
-    	font = init_font;
-    	align = init_align;
-    	string_space = init_string_space;
-    	if (init_char_space) char_space.push_back(init_char_space);
-  	}
+	{
+		text = str;
+		font = init_font;
+		align = init_align;
+		string_space = init_string_space;
+		if (init_char_space) char_space.push_back(init_char_space);
+	}
+
+	int16_t get_char_space(uint16_t str_n = 0) {return (str_n < char_space.size()) ? char_space[str_n] : ((char_space.size()) ? char_space[char_space.size() - 1] : 0);}
 };
 
 
@@ -77,7 +79,8 @@ public:
 
 	tFontText text_data;
 
-	static void set_or_update_text(VBDisplay &display, uint32_t* layer_cnt_store, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t color, uint8_t options);
+	static uint32_t set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, uint32_t desired_layer, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t color, uint8_t options);
+	static void set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t color, uint8_t options);
 	
 	static void set_char_space(tFontText& text, int16_t min_char_space, int16_t max_char_space, int16_t place_length);
 	static uint16_t text_lines_count(tFontText& text);

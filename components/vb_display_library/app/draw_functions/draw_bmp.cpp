@@ -732,6 +732,48 @@ VBDL_tImage::VBDL_tImage(const tImage* img, int16_t _x, int16_t _y, uint32_t _co
 	handle = (void*)img->data;
 	color = _color;
 }
+#if 0
+VBDL_tImage::VBDL_tImage(const lv_img_dsc_t* img, int16_t x, int16_t y, uint32_t _color, uint8_t _options, uint8_t _align)
+{
+	if (img == NULL) return;
+	
+	options = _options | BMP_RGBA;
+	options^=BMP_VERTICAL_MIRROR;
+
+	uint32_t dataSize = img->data_size;
+	uint8_t pixel_size;
+
+	if (img->header.cf == LV_IMG_CF_INDEXED_8BIT)
+	{
+		pixel_size = (dataSize - 256*4) / (img->header.w * img->header.h);
+		options |= BMP_INDEXED_8BIT;
+	}
+	else if (img->header.cf == LV_IMG_CF_INDEXED_4BIT)
+	{
+		pixel_size = (dataSize - 16*4) * 2 / (img->header.w * img->header.h);
+		options |= BMP_INDEXED_4BIT;
+	}
+	else if (img->header.cf == LV_IMG_CF_TRUE_COLOR_ALPHA || img->header.cf == LV_IMG_CF_TRUE_COLOR)
+	{
+		pixel_size = dataSize/(img->header.w * img->header.h);
+		options |= DRAW_INV_COLOR;
+	}
+	else return;
+	
+	if (pixel_size == 1) options SETBITS BMP_RGB8;
+	else if (pixel_size == 2) options SETBITS BMP_RGB16;
+	else if (pixel_size == 3) options SETBITS BMP_RGB24;
+	else if (pixel_size == 4) options SETBITS BMP_ARGB32;
+	else return;
+  
+	pos = VBDisplay::get_rect(x, y, img->header.w, img->header.h, _align);
+	
+	handle = (void*)img->data;
+	color = color;
+  
+	return;
+}
+#endif
 void VBDL_tImage::fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options)
 {
 	VBDL_InternalPushLayer img(this, mask, layer_options);
@@ -898,7 +940,7 @@ void VBDL_BMP_from_file::fill_str_memclear(internal_draw_obj* img)
 
 #ifdef USER_FILESYSTEM
 
-VBDL_BMP_from_user_filesystem::VBDL_BMP_from_user_filesystem(ufs_partition_t* partition, const char* file_name, int16_t _x, int16_t _y, uint32_t _color, uint8_t _options, uint8_t _align)
+VBDL_BMP_from_user_filesystem::VBDL_BMP_from_user_filesystem(const ufs_partition_t* partition, const char* file_name, int16_t _x, int16_t _y, uint32_t _color, uint8_t _options, uint8_t _align)
 {
 	USER_FILE outfile;
 	

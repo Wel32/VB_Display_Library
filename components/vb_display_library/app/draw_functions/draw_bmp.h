@@ -54,13 +54,13 @@ class VBDL_tImage : public draw_obj
 {
 public:
 	VBDL_tImage(const tImage* img, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+	//VBDL_tImage(const lv_img_dsc_t* img, int16_t x, int16_t y, uint32_t _color, uint8_t _options, uint8_t _align);
 
 protected:
 	void* handle;
 	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
 	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
 	void fill_str_memclear(internal_draw_obj* img) override;
-    //~VBDL_Fill() override;
 };
 
 class VBDL_Embed_BMP : public draw_obj
@@ -74,7 +74,6 @@ protected:
 	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
 	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
 	void fill_str_memclear(internal_draw_obj* img) override;
-    //~VBDL_Fill() override;
 };
 
 class VBDL_BMP_from_file : public draw_obj
@@ -87,15 +86,16 @@ protected:
 	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
 	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
 	void fill_str_memclear(internal_draw_obj* img) override;
-    //~VBDL_Fill() override;
 };
 
 
 #ifdef USER_FILESYSTEM
+
+
 class VBDL_BMP_from_user_filesystem : public draw_obj
 {
 public:
-	VBDL_BMP_from_user_filesystem(ufs_partition_t* partition, const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+	VBDL_BMP_from_user_filesystem(const ufs_partition_t* partition, const char* filename, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 	~VBDL_BMP_from_user_filesystem();
 
 protected:
@@ -104,7 +104,6 @@ protected:
 	void fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options) override;
 	void fill_str_memcpy(uint8_t* buf, internal_draw_obj* img) override;
 	void fill_str_memclear(internal_draw_obj* img) override;
-    //~VBDL_Fill() override;
 };
 #endif
 

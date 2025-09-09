@@ -67,7 +67,7 @@ public:
 		y0 = 0;
 		pos = void_rect;
 		options = 0;
-		color = 0;
+		color = 0xFF000000;
 		layer_ptr = NULL;
 	}
 
