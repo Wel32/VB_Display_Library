@@ -148,22 +148,13 @@ void* Screen3::Select()
 		dx[i++] = 204;
 	}
 
-	uint8_t text_set_pos = 0;
-
-	for (uint16_t j = 1; j < 2000; j++)
+	for (uint16_t j = 0; j < 2000; j++)
 	{
 		if (!(j % 200))
 		{
 			text_color_i = modulo_addition(text_color_i, +1, sizeof(text_color)/sizeof(uint32_t));
 
-			int16_t tx = ScreenWidth / 2, ty = text_start_y;
-			if (++text_set_pos == 1) tx +=40;
-			else if (text_set_pos == 2) ty +=40;
-			else if (text_set_pos == 3) tx -=40;
-			else if (text_set_pos == 4) ty -=40;
-			else text_set_pos = 0;
-
-			VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, caption_text, tx, ty, text_color[text_color_i], 0);
+			VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, caption_text, ScreenWidth / 2, text_start_y, text_color[text_color_i], 0);
 		}
 		
 		vTaskDelay(1);

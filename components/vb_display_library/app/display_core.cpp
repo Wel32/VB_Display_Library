@@ -582,6 +582,13 @@ draw_obj* VBDisplay::screen_buf_get_obj(uint32_t layer)
 	return NULL;
 }
 
+draw_obj* VBDisplay::screen_buf_get_obj(uint32_t* layer_num_handle)
+{
+	if (layer_num_handle == NULL) return NULL;
+	if (*layer_num_handle < draw_buffer.obj.size()) return (draw_buffer.obj[*layer_num_handle]).get();
+	return NULL;
+}
+
 void VBDisplay::screen_buf_delete_obj(uint32_t layer)
 {
 	if (layer < draw_buffer.obj.size())
@@ -650,7 +657,6 @@ void VBDisplay::change_obj_layer(uint32_t obj_layer, uint32_t new_layer)
 
 	std::unique_ptr moving_obj = std::move(draw_buffer.obj[obj_layer]);
 	draw_buffer.obj.erase(draw_buffer.obj.begin() + obj_layer);
-
 	draw_buffer.obj.emplace(draw_buffer.obj.begin() + new_layer, std::move(moving_obj));
 
 	uint32_t start_layer = min1(obj_layer, new_layer), end_layer = max1(obj_layer, new_layer);
@@ -703,7 +709,7 @@ void VBDisplay::update_obj(std::unique_ptr<draw_obj> new_obj, uint32_t img_layer
 	else new_pos = void_rect;
 
 	screen_buf_update_obj(std::move(new_obj), img_layer);
-	update_area_on_screen(cur_pos, new_pos, img_layer);
+	update_area_on_screen(cur_pos, new_pos);
 }
 
 #ifdef ENABLE_FRAGMEMT_DRAWING
@@ -712,7 +718,7 @@ void VBDisplay::update_obj(std::unique_ptr<draw_obj> new_obj, uint32_t img_layer
 #define intrn_common_draw2(del_mask, end_layer) common_draw(del_mask, end_layer)
 #endif
 
-void VBDisplay::update_area_on_screen(rect cur_pos, rect new_pos, uint32_t img_layer)
+void VBDisplay::update_area_on_screen(rect cur_pos, rect new_pos)
 {
 	if (check_valid_rect(&cur_pos))
 	{
@@ -818,7 +824,7 @@ void VBDisplay::move_obj_to_new_xy(uint32_t img_layer, int16_t new_x, int16_t ne
 	if (!update_on_the_screen) return;
 	if (check_equal_rects(&(new_img->pos), &cur_pos)) return;
 
-	update_area_on_screen(cur_pos, new_img->pos, img_layer);
+	update_area_on_screen(cur_pos, new_img->pos);
 }
 
 void VBDisplay::move_obj_dxdy(uint32_t img_layer, int16_t dx, int16_t dy, bool update_on_the_screen)
@@ -837,7 +843,7 @@ void VBDisplay::move_obj_dxdy(uint32_t img_layer, int16_t dx, int16_t dy, bool u
 
 	if (!update_on_the_screen) return;
 
-	update_area_on_screen(cur_pos, new_img->pos, img_layer);
+	update_area_on_screen(cur_pos, new_img->pos);
 }
 
 

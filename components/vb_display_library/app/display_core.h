@@ -42,9 +42,9 @@ public:
     static uint32_t calc_start_pos(uint32_t img_bias_pix, int16_t y0, uint16_t img_width_elem, uint8_t elem_per_pix);
     static uint32_t calc_start_pos_vertical_mirror(uint32_t img_bias_pix, int16_t y0, uint16_t img_width_elem, int16_t img_height, uint8_t elem_per_pix);
 
-    static void update_area_on_screen(VBDisplay &Display, rect cur_pos, rect new_pos, uint32_t img_layer)
+    static void update_area_on_screen(VBDisplay &Display, rect cur_pos, rect new_pos)
     {
-        Display.update_area_on_screen(cur_pos, new_pos, img_layer);
+        Display.update_area_on_screen(cur_pos, new_pos);
     }
 };
 

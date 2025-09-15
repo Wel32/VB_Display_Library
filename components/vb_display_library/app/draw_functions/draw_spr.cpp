@@ -48,6 +48,26 @@ VBDL_Sprite::VBDL_Sprite(const tSprite* spr, int16_t _x, int16_t _y, uint32_t _c
 	color = _color;
 	options = _options;
 }
+
+typedef struct
+{
+	uint16_t spr_id;
+	uint16_t width;
+	uint16_t height;
+	uint16_t dummy;
+} tSpriteHeader;
+
+VBDL_Sprite::VBDL_Sprite(const uint8_t* spr, int16_t _x, int16_t _y, uint32_t _color, uint8_t _options, uint8_t _align)
+{
+	if (spr == NULL) return;
+	tSpriteHeader* descr = (tSpriteHeader*)spr;
+	if(descr->spr_id != 0x3303) return;
+
+	pos = VBDisplay::get_rect(_x, _y, descr->width, descr->height, _align);
+	handle = (void*)(spr + sizeof(tSpriteHeader));
+	color = _color;
+	options = _options;
+}
 void VBDL_Sprite::fill_str_init(std::vector <internal_draw_obj> &buf, rect mask, uint16_t layer_options)
 {
 	VBDL_InternalPushLayer img(this, mask, layer_options);

@@ -590,14 +590,10 @@ uint32_t VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_
 {
 	if (!text.text.size()) return display.set_or_update_obj(display.make_void_obj(), layer_num_handle, desired_layer);
 
-	uint32_t disp_obj_count = display.obj_count();
-	uint32_t layer = (layer_num_handle != NULL) ? (*layer_num_handle) : desired_layer;
+	draw_obj* old_obj = display.screen_buf_get_obj(layer_num_handle);
+	rect old_rect = (old_obj != NULL) ? old_obj->pos : VBDisplay::void_rect;
 
-	if (layer >= disp_obj_count)
-	{
-		layer = disp_obj_count;
-		display.screen_buf_insert_obj(display.make_void_obj(), layer_num_handle);
-	}
+	desired_layer = display.set_or_update_obj(std::make_unique<VBDL_tFontText>(text, init_text_x0, init_text_y0, _color, _options), layer_num_handle, desired_layer, 0);
 
 	uint8_t init = 0;
 	int16_t y = -1;
@@ -605,9 +601,6 @@ uint32_t VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_
 	int16_t text_y0 = init_text_y0;
 	uint32_t string_n = 0;
 	int16_t str_char_space = 0;
-	
-	rect old_rect = display.screen_buf_get_obj(layer)->pos;
-	rect common_new_rect;
 
 	const wchar_t* c2;
 	for (const wchar_t* c =  text.text.data(); *c != '\0'; c = c2, string_n++)
@@ -625,38 +618,18 @@ uint32_t VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_
 		if (init) clamp_max(dummy_rect.y1, y);
 		if (*c2 != '\0') clamp_min(dummy_rect.y0, new_rect.y0);
 
-		draw_tFont_string(display, layer, dummy_rect, text.font, str_char_space, c, str_sym_cnt, new_rect.x0, new_rect.y0, _color, _options, text.align);
+		draw_tFont_string(display, dummy_rect, text.font, str_char_space, c, str_sym_cnt, new_rect.x0, new_rect.y0, _color, _options, text.align);
 
 		y = new_rect.y0 - 1;
 		text_y0 -= text.string_space;
-
-		if (!init)
-		{
-			init = 1;
-			common_new_rect = new_rect;
-		}
-		else common_new_rect = VBDisplay::max_rect_no_valid_check(common_new_rect, new_rect);
 	}
 
-	std::unique_ptr<VBDL_tFontText> new_text_obj = std::make_unique<VBDL_tFontText>();
-	new_text_obj->text_data = text;
-	new_text_obj->x0 = init_text_x0;
-	new_text_obj->y0 = init_text_y0;
-	new_text_obj->color = _color;
-	new_text_obj->options = _options;
-	new_text_obj->pos = common_new_rect;
-
-	display.screen_buf_update_obj(std::move(new_text_obj), layer);
-
-	return layer + 1;
+	return desired_layer;
 }
 
-void VBDL_tFontText::draw_tFont_string(VBDisplay &display, uint32_t layer, rect old_rect, tFont font, int16_t char_space, const wchar_t* str, uint32_t sym_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
+void VBDL_tFontText::draw_tFont_string(VBDisplay &display, rect old_rect, tFont font, int16_t char_space, const wchar_t* str, uint32_t sym_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align)
 {
-	if (!sym_cnt) char_space = 0;
-
 	uint32_t additional_obj_layer = (uint32_t)(-1);
-	if (char_space < 0) display.screen_buf_insert_obj(display.make_void_obj(), &additional_obj_layer);
 
 	int16_t x = -1;
 	int16_t internal_text_x = text_x0;
@@ -675,20 +648,10 @@ void VBDL_tFontText::draw_tFont_string(VBDisplay &display, uint32_t layer, rect 
 		internal_text_x = x + char_space;
 
 		std::unique_ptr<draw_obj> cur_sym = std::make_unique<VBDL_tFont>(sym);
-		display.screen_buf_update_obj(std::move(cur_sym), layer);
-
-		VBDL_InternalPushLayer::update_area_on_screen(display, dummy_rect, sym.pos, layer);
-		
-		if (char_space < 0)
-		{
-			std::unique_ptr<draw_obj> prev_sym = std::make_unique<VBDL_tFont>(sym);
-			display.screen_buf_update_obj(std::move(prev_sym), additional_obj_layer);
-		}
+		VBDL_InternalPushLayer::update_area_on_screen(display, dummy_rect, sym.pos);
 	}
 
 	rect dummy2_rect = old_rect;
 	clamp_min(dummy2_rect.x0, x);
-	VBDL_InternalPushLayer::update_area_on_screen(display, dummy2_rect, display.void_rect, layer);
-
-	if (char_space < 0) display.screen_buf_delete_obj(additional_obj_layer);
+	VBDL_InternalPushLayer::update_area_on_screen(display, dummy2_rect, display.void_rect);
 }

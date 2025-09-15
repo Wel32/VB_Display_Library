@@ -56,7 +56,6 @@ class VBDL_tFont : public draw_obj
 {
 	friend class VBDL_tFontText;
 public:
-	VBDL_tFont() = default;
 	VBDL_tFont(wchar_t c, tFont font, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
 	static uint32_t autogamma_options(uint32_t bg_color, uint32_t f_color);
@@ -74,7 +73,6 @@ private:
 class VBDL_tFontText : public draw_obj
 {
 public:
-	VBDL_tFontText() = default;
 	VBDL_tFontText(tFontText &text, int16_t x0, int16_t y0, uint32_t color, uint8_t options);
 
 	tFontText text_data;
@@ -93,7 +91,7 @@ protected:
 	void fill_str_memclear(internal_draw_obj* img) override {}
 
 private:
-	static void draw_tFont_string(VBDisplay &display, uint32_t layer, rect old_rect, tFont font, int16_t char_space, const wchar_t* str, uint32_t sym_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align);
+	static void draw_tFont_string(VBDisplay &display, rect old_rect, tFont font, int16_t char_space, const wchar_t* str, uint32_t sym_cnt, int16_t text_x0, int16_t text_y0, uint32_t color, uint8_t options, uint8_t align);
 	rect internal_fill_str_init(std::vector <internal_draw_obj> *buf, rect mask, uint16_t layer_options);
 };
 

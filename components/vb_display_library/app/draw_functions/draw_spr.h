@@ -18,6 +18,7 @@ class VBDL_Sprite : public draw_obj
 {
 public:
 	VBDL_Sprite(const tSprite* spr, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
+	VBDL_Sprite(const uint8_t* spr, int16_t x, int16_t y, uint32_t color, uint8_t options, uint8_t align);
 
 protected:
 	void* handle;

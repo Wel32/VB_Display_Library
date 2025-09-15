@@ -64,6 +64,7 @@ public:
 
     void screen_buf_insert_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_handle, uint32_t layer = (uint32_t)(-1));
     draw_obj* screen_buf_get_obj(uint32_t layer);
+    draw_obj* screen_buf_get_obj(uint32_t* layer_num_handle);
     void screen_buf_delete_obj(uint32_t layer);
     void screen_buf_update_obj(std::unique_ptr<draw_obj> obj, uint32_t layer);
 
@@ -93,7 +94,7 @@ private:
     void internal_common_draw(rect mask, uint32_t end_layer);
 #endif
 
-    void update_area_on_screen(rect cur_pos, rect new_pos, uint32_t img_layer);
+    void update_area_on_screen(rect cur_pos, rect new_pos);
     static void lcdInternalSetRect(rect r);
 
     static uint8_t* string_alloc_buffer;
