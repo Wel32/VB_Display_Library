@@ -628,6 +628,7 @@ uint32_t VBDisplay::set_or_update_obj(std::unique_ptr<draw_obj> obj, uint32_t* l
 		if (update_on_the_screen) update_obj(std::move(obj), req_layer);
 		else screen_buf_update_obj(std::move(obj), req_layer);
 
+		if (!obj) return req_layer;
 		return req_layer + 1;
 	}
 	else
