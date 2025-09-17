@@ -619,17 +619,44 @@ void VBDisplay::screen_buf_update_obj(std::unique_ptr<draw_obj> obj, uint32_t la
 	}
 }
 
+/*
+The main method for adding updating, and deleting objects on the screen.
+
+Arguments:
+obj - a new object to add or update the current one. If it is empty (obj == false), the current object will be deleted if it exists.
+layer_num_handle - a reference to an external buffer used to store the layer number. By default, the value NULL is substituted.
+	The initial value of the buffer, if any, must be >=obj_count() (it is convenient to use 0xFFFFFFFF (-1ul)) - a sign that the object in the buffer does not exist or has been deleted.
+	After adding a new object, the value of its layer is written to the address layer_num_handle and must be stored for subsequent operations with the object. When an object is deleted, the value -1 is written.
+desired_layer - the desired layer to add the object to, provided that its value is <obj_count().
+	Also, if layer_num_handle == NULL, its value is used as the layer number to add the object or to delete it (all objects starting from the desired_layer are shifted by one layer).
+	If its value is >=obj_count(), the object is added to a new layer on top of the others. By default, the value 0xFFFFFFFF (-1ul) is substituted.
+	If you need to add a new object between existing layers, you must specify an existing layer_num_handle buffer with a layer number value >=obj_count() (-1ul) and desired_layer with the desired layer number.
+	All current objects starting from the current layer at the desired_layer number are shifted up one layer.
+	If necessary, the link to the layer buffer can then be deleted by calling the method with the layer of the added object
+	and specifying NULL as a new link to the buffer (that is, pin_layer_handle_to_obj(*layer_num_handle, NULL)).
+update_on_the_screen - flag for immediate updating of the object on the screen. By default, update_on_the_screen == 1. If you specify 0, the changes will be saved in the buffer and will not be reflected on the screen.
+	This is sometimes useful if you need to update several elements located one above the other in the buffer, and then update them on the screen in one pass using the common_draw() method or one of the redraw_...() methods.
+
+Return value:
+If the object is newly placed or an existing object is updated, the value of the layer following it is returned (or obj_count() if the object is the last one).
+If the object is deleted (obj == false), the value of the layer on which it was placed is returned.
+All objects that were on top of the deleted one are shifted down one layer, so the next higher object will be at the specified number.
+If the object did not exist and was not created (obj == false), the value of desired_layer is returned.
+The return value can be useful if it is necessary to control the sequence of objects by layers during their sequential updating, if some of them can be either deleted or re-added in the process.
+*/
 uint32_t VBDisplay::set_or_update_obj(std::unique_ptr<draw_obj> obj, uint32_t* layer_num_handle, uint32_t desired_layer, bool update_on_the_screen)
 {
 	uint32_t req_layer = (layer_num_handle != NULL)?(*layer_num_handle):desired_layer;
 
 	if (req_layer < draw_buffer.obj.size())
 	{
+		uint32_t ret = req_layer;
+		if (obj) ret++;
+
 		if (update_on_the_screen) update_obj(std::move(obj), req_layer);
 		else screen_buf_update_obj(std::move(obj), req_layer);
 
-		if (!obj) return req_layer;
-		return req_layer + 1;
+		return ret;
 	}
 	else
 	{

@@ -78,7 +78,6 @@ public:
 	tFontText text_data;
 
 	static uint32_t set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, uint32_t desired_layer, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t color, uint8_t options);
-	static void set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t color, uint8_t options);
 	
 	static void set_char_space(tFontText& text, int16_t min_char_space, int16_t max_char_space, int16_t place_length);
 	static uint16_t text_lines_count(tFontText& text);

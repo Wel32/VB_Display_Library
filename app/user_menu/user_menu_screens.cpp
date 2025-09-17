@@ -51,7 +51,7 @@ void* Screen2::Select()
 
 	int16_t start_y = (ScreenHeight + caption_text.string_space * (str_count - 1))/2;
 
-	VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, caption_text, ScreenWidth / 2, start_y, 0xFFFF00, DRAW_INV_TRANSPARENCY);
+	VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, -1, caption_text, ScreenWidth / 2, start_y, 0xFFFF00, DRAW_INV_TRANSPARENCY);
 
 	vTaskDelay(5000 / portTICK_PERIOD_MS);
 
@@ -163,7 +163,7 @@ void* Screen3::Select()
 			else if (text_set_pos == 4) ty -=40;
 			else text_set_pos = 0;
 
-			VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, caption_text, tx, ty, text_color[text_color_i], 0);
+			VBDL_tFontText::set_or_update_text(Display, &caption_text_layer, -1, caption_text, tx, ty, text_color[text_color_i], 0);
 		}
 		
 		vTaskDelay(1);

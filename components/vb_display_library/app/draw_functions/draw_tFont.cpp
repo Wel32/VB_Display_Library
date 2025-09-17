@@ -168,6 +168,18 @@ uint16_t VBDL_tFontText::text_lines_count(tFontText& text)
 	return ret;
 }
 
+/*
+This method implements smart text wrapping with automatic word grouping by lines, ensuring the most uniform line width.
+Arguments:
+text - the text to be processed. The method works by replacing space characters in the text with newline characters.
+The source text must not contain line breaks. The spacing between characters, if specified, must also be reset (text.char_space.clear()).
+place_width - the width of the place (rectangular area) for placing the text.
+min_char_space, max_char_space - the minimum and maximum spacing between characters.
+max_lines_cnt - the maximum number of lines.
+
+Return value:
+The number of lines in the processed text.
+*/
 uint16_t VBDL_tFontText::text_autowrap(tFontText& text, int16_t place_width, int16_t min_char_space, int16_t max_char_space, uint16_t max_lines_cnt)
 {
 	if (text.char_space.size()) return text_lines_count(text);
@@ -580,12 +592,19 @@ inline rect VBDL_tFontText::internal_fill_str_init(std::vector <internal_draw_ob
 	return res_text_pos;
 }
 
+/*
+A method for adding, updating, and deleting text on the screen. Works similarly to the VBDisplay::set_or_update_obj() method, but is optimized for working with text. Allows you to update text on the display without blinking.
+It also saves RAM because letters are updated one by one, not all at once.
 
+Arguments:
+display - the current display object.
+layer_num_handle, desired_layer - work the same way as the VBDisplay::set_or_update_obj() method.
+text - the text to be updated or newly placed. If the text is empty, an empty object (void_obj) is written to the buffer, the current text, if it was on the screen, is deleted.
+init_text_x0, init_text_y0 - coordinates for placement on the display.
+_color, _options - text color and options for it.
 
-void VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_cnt_store, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t _color, uint8_t _options)
-{
-	set_or_update_text(display, layer_cnt_store, -1, text, init_text_x0, init_text_y0, _color, _options);
-}
+The return value is the same as that of the VBDisplay::set_or_update_obj() method.
+*/
 uint32_t VBDL_tFontText::set_or_update_text(VBDisplay &display, uint32_t* layer_num_handle, uint32_t desired_layer, tFontText &text, int16_t init_text_x0, int16_t init_text_y0, uint32_t _color, uint8_t _options)
 {
 	if (!text.text.size()) return display.set_or_update_obj(display.make_void_obj(), layer_num_handle, desired_layer);
